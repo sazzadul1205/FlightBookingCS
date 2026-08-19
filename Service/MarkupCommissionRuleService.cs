@@ -28,6 +28,7 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
         {
             result.Add(new MarkupCommissionRuleIndexViewModel
             {
+                Id = markup.Id,
                 UserId = markup.UserId,
                 AirlineCode = markup.AirlineCode,
                 MarkupType = markup.MarkupType,
@@ -35,6 +36,8 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
                 CommissionType = markup.CommissionType,
                 CommissionValue = markup.CommissionValue,
                 IsActive = markup.IsActive,
+                CreatedAt = markup.CreatedAt,
+                UpdatedAt = markup.UpdatedAt,
             });
         }
 
@@ -52,6 +55,7 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
         {
             result.Add(new MarkupCommissionRuleIndexViewModel
             {
+                Id = markup.Id,
                 UserId = markup.UserId,
                 AirlineCode = markup.AirlineCode,
                 MarkupType = markup.MarkupType,
@@ -59,6 +63,8 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
                 CommissionType = markup.CommissionType,
                 CommissionValue = markup.CommissionValue,
                 IsActive = markup.IsActive,
+                CreatedAt = markup.CreatedAt,
+                UpdatedAt = markup.UpdatedAt,
             });
         }
 
@@ -66,9 +72,10 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
     }
 
 
-    public async Task<MarkupCommissionRuleIndexViewModel?> GetByIdAsync(int markupId)
+    public async Task<MarkupCommissionRuleIndexViewModel?> GetByIdAsync(int markupId, string userId)
     {
-        var markup = await _context.MarkupCommissionRule.FirstOrDefaultAsync(x => x.Id == markupId);
+        var markup = await _context.MarkupCommissionRule.FirstOrDefaultAsync(x =>
+        x.Id == markupId && x.UserId == userId);
 
         if (markup == null)
         {
@@ -77,6 +84,7 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
 
         return new MarkupCommissionRuleIndexViewModel
         {
+            Id = markup.Id,
             UserId = markup.UserId,
             AirlineCode = markup.AirlineCode,
             MarkupType = markup.MarkupType,
@@ -84,6 +92,8 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
             CommissionType = markup.CommissionType,
             CommissionValue = markup.CommissionValue,
             IsActive = markup.IsActive,
+            CreatedAt = markup.CreatedAt,
+            UpdatedAt = markup.UpdatedAt,
         };
     }
 

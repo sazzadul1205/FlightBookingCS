@@ -9,7 +9,7 @@ public interface IMarkupCommissionRuleService
     // Task<List<MarkupCommissionRuleIndexViewModel>> GetAllAsync();
     Task<List<MarkupCommissionRuleIndexViewModel>> GetAllByUserIdAsync(string userId);
     Task<List<MarkupCommissionRuleIndexViewModel>> GetAllDeletedByUserIdAsync(string userId);
-    Task<MarkupCommissionRuleIndexViewModel?> GetByIdAsync(int markupId);
+    Task<MarkupCommissionRuleIndexViewModel?> GetByIdAsync(int markupId, string userId);
     Task<ServiceResult> CreateAsync(MarkupCommissionRuleCreateViewModel model, string userId);
     Task<ServiceResult> EditAsync(MarkupCommissionRuleEditViewModel model, string userId);
     Task<ServiceResult> ChangeStatusAsync(int id, string userId);

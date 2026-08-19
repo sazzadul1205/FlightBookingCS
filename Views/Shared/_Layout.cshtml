@@ -12,6 +12,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
+@{
+    var isLoggedIn = ViewData["IsLoggedIn"] as bool? ?? false;
+}
 <body class="bg-gray-50">
     <header>
         <nav class="bg-white shadow-lg border-b border-gray-200">
@@ -29,12 +32,18 @@
                                asp-area="" asp-controller="Home" asp-action="Index">
                                 Home
                             </a>
+
+                            @if (isLoggedIn)
+                            {
+                                 <a class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150"
+                               asp-area="" asp-controller="MarkupCommissionRule" asp-action="Index">
+                                Manage Rule
+                            </a>
+                            }
                         </div>
                     </div>
                     <div class="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-                        @{
-                            var isLoggedIn = ViewData["IsLoggedIn"] as bool? ?? false;
-                        }
+                        
                         @if (isLoggedIn)
                         {
                             <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
