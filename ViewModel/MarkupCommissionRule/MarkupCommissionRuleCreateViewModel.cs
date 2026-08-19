@@ -5,7 +5,7 @@ namespace FlightBookingCS.ViewModel.MarkupCommissionRule;
 
 public class MarkupCommissionRuleCreateViewModel
 {
-    public string? UserId { get; set; }
+    // public string? UserId { get; set; }
     [MaxLength(5)]
     public string? AirlineCode { get; set; }
 

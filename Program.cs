@@ -56,6 +56,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IMarkupCommissionRuleService, MarkupCommissionRuleService>();
 
 var app = builder.Build();
 
