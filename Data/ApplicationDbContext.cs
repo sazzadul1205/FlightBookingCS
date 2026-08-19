@@ -11,4 +11,6 @@ public class ApplicationDbContext : IdentityDbContext
         : base(options)
     {
     }
+
+    public DbSet<MarkupCommissionRule> MarkupCommissionRule { get; set; }
 }
