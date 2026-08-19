@@ -55,6 +55,7 @@ builder.Services.AddAuthentication(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 
 var app = builder.Build();
 
@@ -75,7 +76,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Home}/{action=privacy}/{id?}")
     .WithStaticAssets();
 
 app.Run();

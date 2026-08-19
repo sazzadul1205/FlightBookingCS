@@ -1,20 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using FlightBookingCS.ViewModel;
+using FlightBookingCS.Service.Interface;
 
 namespace FlightBookingCS.Controllers;
 
 public class AccountController : Controller
 {
-    private readonly UserManager<IdentityUser> _userManager;
-    private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly IAccountService _accountService;
 
     public AccountController(
-        UserManager<IdentityUser> userManager,
-        SignInManager<IdentityUser> signInManager)
+         IAccountService accountService)
     {
-        _userManager = userManager;
-        _signInManager = signInManager;
+        _accountService = accountService;
     }
 
     [HttpGet]
@@ -32,26 +30,26 @@ public class AccountController : Controller
             return View(model);
         }
 
-        var user = new IdentityUser
-        {
-            UserName = model.Email,
-            Email = model.Email
-        };
+        var result = await _accountService.RegisterAsync(model);
 
-        var result = await _userManager.CreateAsync(user, model.Password);
-
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            return RedirectToAction("Index", "Home");
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error);
+            }
+
+            return View(model);
         }
 
-        foreach (var error in result.Errors)
+        Response.Cookies.Append("access_token", result.Token!, new CookieOptions
         {
-            ModelState.AddModelError(string.Empty, error.Description);
-        }
-
-        return View(model);
+            HttpOnly = false,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddMinutes(60)
+        });
+        return RedirectToAction("Index", "Home");
     }
 
     [HttpGet]
@@ -69,25 +67,32 @@ public class AccountController : Controller
             return View(model);
         }
 
-        var result = await _signInManager.PasswordSignInAsync(
-            model.Email,
-            model.Password,
-            model.RememberMe,
-            lockoutOnFailure: false);
+        var result = await _accountService.LoginAsync(model);
 
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-            return RedirectToAction("Index", "Home");
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error);
+            }
+            return View(model);
         }
 
-        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-        return View(model);
+        Response.Cookies.Append("access_token", result.Token!, new CookieOptions
+        {
+            HttpOnly = false,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddMinutes(60)
+        });
+        return RedirectToAction("Index", "Home");
     }
 
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
-        await _signInManager.SignOutAsync();
+        Response.Cookies.Delete("access_token");
         return RedirectToAction("Index", "Home");
     }
+
 }

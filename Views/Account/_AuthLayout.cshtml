@@ -7,17 +7,35 @@
     <title>@ViewData["Title"] - FlightBookingCS</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-    <div class="container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-6 col-lg-4">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <h2 class="text-center mb-4">@ViewData["Title"]</h2>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="w-full max-w-md">
+                <!-- Logo/Brand -->
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">
+                        ✈️ Flight Booking
+                    </h1>
+                </div>
+
+                <!-- Card -->
+                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <div class="px-8 py-8">
+                        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">
+                            @ViewData["Title"]
+                        </h2>
                         @RenderBody()
                     </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center mt-6">
+                    <p class="text-xs text-gray-400">
+                        &copy; 2026 FlightBookingCS. All rights reserved.
+                    </p>
                 </div>
             </div>
         </div>

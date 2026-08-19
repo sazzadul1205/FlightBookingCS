@@ -1,7 +1,6 @@
-namespace FlightBookingCS.Service.Interface
+namespace FlightBookingCS.Service.Interface;
+
+public interface ITokenService
 {
-    public interface ITokenService
-    {
-        string GenerateToken(string userId, string email, IList<string> roles);
-    }
+    string GenerateToken(string userId, string email, IList<string> roles);
 }
