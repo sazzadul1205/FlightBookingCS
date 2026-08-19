@@ -109,6 +109,15 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
             return ServiceResult.Error("Markup value must be between 0 and 100.");
         }
 
+        // Check if airline code Already Used.
+        var checkAvailability = await _context.MarkupCommissionRule.FirstOrDefaultAsync(x =>
+        x.AirlineCode == model.AirlineCode && x.UserId == userId);
+
+        if (checkAvailability != null)
+        {
+            return ServiceResult.Error("Airline code Already Used..");
+        }
+
         var markup = new MarkupCommissionRule()
         {
             UserId = userId,
@@ -147,6 +156,15 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
         if (model.MarkupType == "Percentage" && (model.MarkupValue < 0 || model.MarkupValue > 100))
         {
             return ServiceResult.Error("Markup value must be between 0 and 100.");
+        }
+
+        // Check if airline code Already Used.
+        var checkAvailability = await _context.MarkupCommissionRule.FirstOrDefaultAsync(x =>
+        x.AirlineCode == model.AirlineCode && x.UserId == userId);
+
+        if (checkAvailability != null)
+        {
+            return ServiceResult.Error("Airline code Already Used..");
         }
 
         result.AirlineCode = model.AirlineCode;
