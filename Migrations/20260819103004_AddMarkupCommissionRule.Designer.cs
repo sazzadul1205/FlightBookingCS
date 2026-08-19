@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FlightBookingCS.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260819102208_AddMarkupCommissionRule")]
+    [Migration("20260819103004_AddMarkupCommissionRule")]
     partial class AddMarkupCommissionRule
     {
         /// <inheritdoc />
