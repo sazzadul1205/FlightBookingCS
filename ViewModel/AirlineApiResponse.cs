@@ -7,7 +7,7 @@ public class AirlineApiResponse
     public string? RequestURL { get; set; }
     public bool Success { get; set; }
     public string Message { get; set; } = string.Empty;
-    public List<AirlinePayload> Airlines { get; set; } = new();
+    public List<AirlinePayload> Payload { get; set; } = new();
     public string PayloadType { get; set; } = string.Empty;
     public string ApiRequestTime { get; set; } = string.Empty;
     public string ApiResponseTime { get; set; } = string.Empty;

@@ -24,6 +24,12 @@ public class AirlineService : IAirlineService
             var apiUrl = "https://uthaotrip.com/api/api/GetAirLines";
             _logger.LogInformation("Fetching airlines from: {ApiUrl}", apiUrl);
 
+            // 
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "FlightBookingApp/1.0");
+            _httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
+
             var response = await _httpClient.GetAsync(apiUrl);
 
             if (response == null)
@@ -38,7 +44,7 @@ public class AirlineService : IAirlineService
                 return CreateErrorResponse($"API returned {response.StatusCode} - {response.ReasonPhrase}");
             }
 
-            // Read as byte array first
+            // Read as byte array first (same as debug method)
             var bytes = await response.Content.ReadAsByteArrayAsync();
 
             if (bytes == null || bytes.Length == 0)
@@ -47,7 +53,7 @@ public class AirlineService : IAirlineService
                 return CreateErrorResponse("API returned empty response");
             }
 
-            // Check if it's GZIP compressed (starts with 0x1F 0x8B)
+            // Check if it's GZIP compressed (starts with 0x1F 0x8B) - same as debug method
             bool isGzip = bytes.Length > 2 && bytes[0] == 0x1F && bytes[1] == 0x8B;
 
             string jsonString;
@@ -72,13 +78,6 @@ public class AirlineService : IAirlineService
             // Log first 200 characters for debugging
             var preview = jsonString.Length > 200 ? jsonString.Substring(0, 200) + "..." : jsonString;
             _logger.LogInformation("Response preview: {Preview}", preview);
-
-            // Check if response is HTML (starts with <)
-            if (jsonString.TrimStart().StartsWith("<"))
-            {
-                _logger.LogError("API returned HTML instead of JSON");
-                return CreateErrorResponse("API returned HTML error page. Please check the API endpoint.");
-            }
 
             // Parse JSON
             return ParseJsonResponse(jsonString);
@@ -142,27 +141,28 @@ public class AirlineService : IAirlineService
                 {
                     Success = false,
                     Message = apiResponse.Message ?? "API returned failure",
-                    Airlines = new List<AirlinePayload>()
+                    Payload = new List<AirlinePayload>()  // Return empty Payload
                 };
             }
 
             // Check if Payload is null
-            if (apiResponse.Airlines == null)
+            if (apiResponse.Payload == null)
             {
                 _logger.LogWarning("API response Payload is null");
                 return new AirlineApiResponse
                 {
                     Success = true,
                     Message = apiResponse.Message ?? "No airlines found",
-                    Airlines = new List<AirlinePayload>()
+                    Payload = new List<AirlinePayload>()
                 };
             }
 
+            // Return the response with Payload
             return new AirlineApiResponse
             {
                 Success = apiResponse.Success,
                 Message = apiResponse.Message ?? "Data found",
-                Airlines = apiResponse.Airlines ?? new List<AirlinePayload>()
+                Payload = apiResponse.Payload ?? new List<AirlinePayload>()
             };
         }
         catch (JsonException jsonEx)
@@ -179,7 +179,7 @@ public class AirlineService : IAirlineService
         {
             Success = false,
             Message = message,
-            Airlines = new List<AirlinePayload>()
+            Payload = new List<AirlinePayload>()
         };
     }
 }
