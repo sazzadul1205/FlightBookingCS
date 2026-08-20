@@ -42,13 +42,7 @@ public class AccountController : Controller
             return View(model);
         }
 
-        Response.Cookies.Append("access_token", result.Token!, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = Request.IsHttps,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTimeOffset.UtcNow.AddMinutes(60)
-        });
+        HttpContext.Session.SetString("access_token", result.Token!);
         return RedirectToAction("Index", "Home");
     }
 
@@ -78,20 +72,14 @@ public class AccountController : Controller
             return View(model);
         }
 
-        Response.Cookies.Append("access_token", result.Token!, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = Request.IsHttps,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTimeOffset.UtcNow.AddMinutes(60)
-        });
+        HttpContext.Session.SetString("access_token", result.Token!);
         return RedirectToAction("Index", "Home");
     }
 
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
-        Response.Cookies.Delete("access_token");
+        HttpContext.Session.Remove("access_token");
         return RedirectToAction("Index", "Home");
     }
 

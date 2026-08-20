@@ -1,11 +1,13 @@
 {
-  "name": "flightbookingcs",
+  "name": "flight booking cs",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tailwind": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/css/app.css --watch"
+    "tailwind": "npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/css/app.css --watch",
+    "build": "dotnet build",
+    "watch": "dotnet watch run"
   },
   "repository": {
     "type": "git",

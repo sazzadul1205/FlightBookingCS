@@ -38,58 +38,31 @@ var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 // Configure JWT
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
-.AddCookie()
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key)
-    };
-
-    // Read JWT from cookie
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = context =>
-        {
-            context.Token = context.Request.Cookies["access_token"]; // Read JWT from cookie
-            return Task.CompletedTask; // Return task
-        },
-        OnChallenge = context =>  
-        {
-            context.HandleResponse();
-            context.Response.Redirect("/Account/Login");
-            return Task.CompletedTask;
-        },
-        OnForbidden = context =>
-        {
-            context.Response.Redirect("/Account/Login");
-            return Task.CompletedTask;
-        }
-    };
-});
-
-// Configure cookie
-builder.Services.ConfigureApplicationCookie(options =>
+.AddCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
+builder.Services.AddScoped<SessionJwtAuthFilter>();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews(options =>
 {
-    options.Filters.Add<LoginStatusFilter>();
+    options.Filters.Add<SessionJwtAuthFilter>();
+    // options.Filters.Add<LoginStatusFilter>();
+});
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(8);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
 
 // Add services
