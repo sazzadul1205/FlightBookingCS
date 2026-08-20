@@ -44,8 +44,8 @@ public class AccountController : Controller
 
         Response.Cookies.Append("access_token", result.Token!, new CookieOptions
         {
-            HttpOnly = false,
-            Secure = true,
+            HttpOnly = true,
+            Secure = Request.IsHttps,
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddMinutes(60)
         });
@@ -80,8 +80,8 @@ public class AccountController : Controller
 
         Response.Cookies.Append("access_token", result.Token!, new CookieOptions
         {
-            HttpOnly = false,
-            Secure = true,
+            HttpOnly = true,
+            Secure = Request.IsHttps,
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddMinutes(60)
         });
@@ -93,6 +93,12 @@ public class AccountController : Controller
     {
         Response.Cookies.Delete("access_token");
         return RedirectToAction("Index", "Home");
+    }
+
+    [HttpGet]
+    public IActionResult AccessDenied()
+    {
+        return View();
     }
 
 }

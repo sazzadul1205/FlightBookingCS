@@ -1,0 +1,56 @@
+@model FlightBookingCS.ViewModel.LoginViewModel
+@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "~/Views/Account/_AuthLayout.cshtml";
+}
+
+<div class="text-center space-y-6">
+    <!-- Access Denied Icon -->
+    <div class="flex justify-center">
+        <div class="h-24 w-24 rounded-full bg-red-100 flex items-center justify-center">
+            <svg class="h-12 w-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 15v2m0 0v2m0-2h2m-2 0h-2m2-4v-4a2 2 0 10-4 0v4m-4 8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v12z" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Title -->
+    <h1 class="text-3xl font-bold text-gray-900">Access Denied</h1>
+
+    <!-- Message -->
+    <p class="text-gray-600 text-lg max-w-md mx-auto">
+        You don't have permission to access this page. Please contact your administrator if you believe this is an
+        error.
+    </p>
+
+    <!-- Error Details (if any) -->
+    @if (!string.IsNullOrEmpty(ViewData["ErrorMessage"]?.ToString()))
+    {
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md mx-auto">
+            <p class="text-sm text-red-700">@ViewData["ErrorMessage"]</p>
+        </div>
+    }
+
+    <!-- Actions -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+        <a asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]"
+           class="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
+            Back to Login
+        </a>
+        <a asp-action="Index" asp-controller="Home"
+           class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2.5 px-6 rounded-lg transition-all duration-200">
+            Go to Homepage
+        </a>
+    </div>
+
+    <!-- Contact support option -->
+    <div class="pt-4">
+        <p class="text-sm text-gray-500">
+            Need help?
+            <a href="#" class="text-blue-600 hover:text-blue-800 font-medium hover:underline transition duration-150">
+                Contact Support
+            </a>
+        </p>
+    </div>
+</div>

@@ -7,7 +7,7 @@ using FlightBookingCS.ViewModel.MarkupCommissionRule;
 
 namespace FlightBookingCS.Controllers;
 
-// [Authorize]
+[Authorize]
 
 public class MarkupCommissionRuleController : Controller
 {
