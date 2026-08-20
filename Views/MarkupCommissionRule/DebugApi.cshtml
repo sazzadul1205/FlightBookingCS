@@ -1,0 +1,108 @@
+﻿@{
+    ViewData["Title"] = "API Debug";
+}
+
+<div class="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
+    <div class="bg-white shadow-sm rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <h5 class="text-lg font-semibold text-gray-900">API Debug Information</h5>
+        </div>
+
+        <div class="px-6 py-4">
+            @if (!string.IsNullOrEmpty(ViewBag.Error))
+            {
+                <div class="p-4 bg-red-50 text-red-700 rounded-lg mb-4">
+                    <strong>Error:</strong> @ViewBag.Error
+                    <pre class="mt-2 text-xs">@ViewBag.StackTrace</pre>
+                </div>
+            }
+
+            <!-- Status Information -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <strong>Status Code:</strong>
+                    <span class="text-green-600 font-semibold">@ViewBag.StatusCode</span>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <strong>Status Description:</strong>
+                    <span class="text-gray-700">@ViewBag.StatusDescription</span>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <strong>Is Success:</strong>
+                    @if (ViewBag.IsSuccess)
+                    {
+                        <span class="text-green-600 font-semibold">✅ Yes</span>
+                    }
+                    else
+                    {
+                        <span class="text-red-600 font-semibold">❌ No</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Headers Information -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <strong>Content Type:</strong>
+                    <span class="font-mono text-sm">@ViewBag.ContentType</span>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <strong>Content Encoding:</strong>
+                    <span class="font-mono text-sm">@ViewBag.ContentEncoding</span>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <strong>Content Length:</strong>
+                    <span class="font-mono text-sm">@(ViewBag.ContentLength ?? 0) bytes</span>
+                </div>
+            </div>
+
+            <!-- Compression Status -->
+            <div class="mb-4">
+                <div class="p-4 rounded-lg border @(ViewBag.IsGzipCompressed ? "bg-blue-50 border-blue-200" : "bg-green-50 border-green-200")">
+                    <strong>Compression Status:</strong>
+                    @if (ViewBag.IsGzipCompressed)
+                    {
+                        <span class="text-blue-700 font-semibold">🔒 GZIP Compressed</span>
+                        <span class="ml-2 text-sm text-gray-600">(Decompressed successfully)</span>
+                    }
+                    else
+                    {
+                        <span class="text-green-700 font-semibold">✅ Not Compressed</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Hex Preview -->
+            <div class="mb-4">
+                <h5 class="font-semibold text-gray-700 mb-2">Hex Preview (First 50 bytes):</h5>
+                <div class="p-3 bg-gray-100 rounded-lg font-mono text-xs break-all">
+                    @ViewBag.HexPreview
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Total bytes: @ViewBag.BytesCount</p>
+            </div>
+
+            <!-- Decompressed Content Preview -->
+            @if (!string.IsNullOrEmpty(ViewBag.RawContent))
+            {
+                <div class="mb-4">
+                    <h5 class="font-semibold text-gray-700 mb-2">Decompressed Content Preview:</h5>
+                    <div class="p-3 bg-green-50 rounded-lg font-mono text-xs overflow-x-auto max-h-60 overflow-y-auto border border-green-200">
+                        <pre>@ViewBag.RawContent</pre>
+                    </div>
+                </div>
+            }
+
+            <!-- Full Response -->
+            @if (!string.IsNullOrEmpty(ViewBag.FullContent))
+            {
+                <div>
+                    <h5 class="font-semibold text-gray-700 mb-2">Full Response (Decompressed):</h5>
+                    <div class="p-3 bg-gray-100 rounded-lg font-mono text-xs overflow-x-auto max-h-96 overflow-y-auto">
+                        <pre>@ViewBag.FullContent</pre>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Total characters: @ViewBag.FullContent.Length</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

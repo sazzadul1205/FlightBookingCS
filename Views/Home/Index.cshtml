@@ -1,9 +1,9 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-    var isLoggedIn = ViewData["IsLoggedIn"] as bool? ?? false;
-    var userName = ViewData["UserName"]?.ToString() ?? "Guest";
-    var userEmail = ViewData["UserEmail"]?.ToString() ?? "";
-    var jwtToken = ViewData["JwtToken"]?.ToString();
+﻿﻿@{
+ViewData["Title"] = "Home Page";
+var isLoggedIn = ViewData["IsLoggedIn"] as bool? ?? false;
+var userName = ViewData["UserName"]?.ToString() ?? "Guest";
+var userEmail = ViewData["UserEmail"]?.ToString() ?? "";
+var sessionExpiry = ViewData["SessionExpiry"] as DateTime?;
 }
 
 <div class="min-h-[60vh] flex items-center justify-center px-4 py-12">
@@ -27,28 +27,16 @@
                     </svg>
                     <div>
                         <h3 class="text-xl font-semibold text-gray-800">You are logged in!</h3>
-                        <p class="text-gray-600 mt-1">Welcome back, <span class="font-medium text-gray-800">@userName</span>
+                        <p class="text-gray-600 mt-1">Welcome back, <span
+                            class="font-medium text-gray-800">@userEmail</span>
                         </p>
                         <p class="text-sm text-gray-500">@userEmail</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-                    <h5 class="text-white font-semibold text-lg flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Your Session Information
-                    </h5>
-                </div>
-                <div class="p-6">
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <p class="text-xs font-mono text-gray-600 break-all leading-relaxed">
-                            @jwtToken
-                        </p>
+                        @if (sessionExpiry.HasValue)
+                        {
+                            <p class="text-xs text-gray-400 mt-2">
+                                Session expires at: @sessionExpiry.Value.ToString("dd/MM/yyyy HH:mm:ss") UTC
+                            </p>
+                        }
                     </div>
                 </div>
             </div>

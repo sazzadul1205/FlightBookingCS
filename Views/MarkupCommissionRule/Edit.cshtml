@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Edit Rule";
+    var airlines = ViewBag.Airlines as List<FlightBookingCS.ViewModel.AirlinePayload> ?? new List<FlightBookingCS.ViewModel.AirlinePayload>();
+    var apiSuccess = ViewBag.ApiSuccess as bool? ?? false;
+    var apiMessage = ViewBag.ApiMessage as string ?? "";
 }
 
 @await Html.PartialAsync("_Alerts")
@@ -21,9 +24,36 @@
 
                 <div class="space-y-4">
                     <div>
-                        <label asp-for="AirlineCode" class="block text-sm font-medium text-gray-700">Airline Code</label>
-                        <input asp-for="AirlineCode" class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., AA" />
+                        <label asp-for="AirlineCode" class="block text-sm font-medium text-gray-700">Airline</label>
+
+                        @if (!apiSuccess)
+                        {
+                            <div class="mb-2 p-3 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <span class="font-medium">⚠️ Note:</span> @apiMessage
+                            </div>
+                        }
+
+                        <select asp-for="AirlineCode" class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="">Select Airline</option>
+                            @if (airlines.Any())
+                            {
+                                foreach (var airline in airlines)
+                                {
+                                    <option value="@airline.Code" selected="@(airline.Code == Model.AirlineCode)">
+                                        @airline.Code - @airline.AriLineName
+                                    </option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="" disabled>No airlines available</option>
+                            }
+                        </select>
                         <span asp-validation-for="AirlineCode" class="text-sm text-red-600"></span>
+                        @if (airlines.Any())
+                        {
+                            <p class="mt-1 text-xs text-gray-500">Showing @airlines.Count airlines from external API</p>
+                        }
                     </div>
 
                     <div>

@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Create New Rule";
+    var airlines = ViewBag.Airlines as List<FlightBookingCS.ViewModel.AirlinePayload> ?? new List<FlightBookingCS.ViewModel.AirlinePayload>();
+    var apiSuccess = ViewBag.ApiSuccess as bool? ?? false;
+    var apiMessage = ViewBag.ApiMessage as string ?? "";
 }
 
 @await Html.PartialAsync("_Alerts")
@@ -20,14 +23,41 @@
 
                 <div class="space-y-4">
                     <div>
-                        <label asp-for="AirlineCode" class="block text-sm font-medium text-gray-700">Airline Code</label>
-                        <input asp-for="AirlineCode" class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., AA" />
+                        <label asp-for="AirlineCode" class="block text-sm font-medium text-gray-700">Airline</label>
+
+                        @if (!apiSuccess)
+                        {
+                            <div class="mb-2 p-3 text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <span class="font-medium">⚠️ Note:</span> @apiMessage
+                            </div>
+                        }
+
+                        <select asp-for="AirlineCode"
+                                class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="">Select Airline</option>
+                            @if (airlines.Any())
+                            {
+                                foreach (var airline in airlines)
+                                {
+                                    <option value="@airline.Code">@airline.Code - @airline.AriLineName</option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="" disabled>No airlines available</option>
+                            }
+                        </select>
                         <span asp-validation-for="AirlineCode" class="text-sm text-red-600"></span>
+                        @if (airlines.Any())
+                        {
+                            <p class="mt-1 text-xs text-gray-500">Showing @airlines.Count airlines from external API</p>
+                        }
                     </div>
 
                     <div>
                         <label asp-for="MarkupType" class="block text-sm font-medium text-gray-700">Markup Type</label>
-                        <select asp-for="MarkupType" class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <select asp-for="MarkupType"
+                                class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                             <option value="">Select Type</option>
                             <option value="Percentage">Percentage</option>
                             <option value="Fixed">Fixed</option>
@@ -37,13 +67,16 @@
 
                     <div>
                         <label asp-for="MarkupValue" class="block text-sm font-medium text-gray-700">Markup Value</label>
-                        <input asp-for="MarkupValue" type="number" step="0.01" class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="0.00" />
+                        <input asp-for="MarkupValue" type="number" step="0.01"
+                               class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                               placeholder="0.00" />
                         <span asp-validation-for="MarkupValue" class="text-sm text-red-600"></span>
                     </div>
 
                     <div>
                         <label asp-for="CommissionType" class="block text-sm font-medium text-gray-700">Commission Type</label>
-                        <select asp-for="CommissionType" class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <select asp-for="CommissionType"
+                                class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                             <option value="">Select Type</option>
                             <option value="Percentage">Percentage</option>
                             <option value="Fixed">Fixed</option>
@@ -53,13 +86,16 @@
 
                     <div>
                         <label asp-for="CommissionValue" class="block text-sm font-medium text-gray-700">Commission Value</label>
-                        <input asp-for="CommissionValue" type="number" step="0.01" class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="0.00" />
+                        <input asp-for="CommissionValue" type="number" step="0.01"
+                               class="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                               placeholder="0.00" />
                         <span asp-validation-for="CommissionValue" class="text-sm text-red-600"></span>
                     </div>
 
                     <div class="flex items-start">
                         <div class="flex items-center h-5">
-                            <input asp-for="IsActive" type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                            <input asp-for="IsActive" type="checkbox"
+                                   class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
                         </div>
                         <div class="ml-3 text-sm">
                             <label asp-for="IsActive" class="font-medium text-gray-700">Active</label>
@@ -69,13 +105,15 @@
                 </div>
 
                 <div class="flex gap-2 pt-4 mt-6 border-t border-gray-200">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                         Create
                     </button>
-                    <a asp-action="Index" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                    <a asp-action="Index"
+                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                         Cancel
                     </a>
                 </div>

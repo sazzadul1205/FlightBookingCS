@@ -1,18 +1,12 @@
-using System.Text;
-
+// Internal
+using FlightBookingCS.Data;
+using FlightBookingCS.Filter;
+using FlightBookingCS.Service;
+using FlightBookingCS.Service.Interface;
 // External
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-
-// Internal
-using FlightBookingCS.Data;
-using FlightBookingCS.Service;
-using FlightBookingCS.Service.Interface;
-using FlightBookingCS.Filter;
-using Microsoft.AspNetCore.Authentication.Cookies;
-
+using System.Text;
 
 // Create builder
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +15,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 // Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
@@ -35,27 +28,36 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
-// Configure JWT
+// Configure Authentication
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+});
+
+// Add HttpClient for Airline API with automatic decompression
+builder.Services.AddHttpClient<IAirlineService, AirlineService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.Clear();
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.DefaultRequestHeaders.Add("User-Agent", "FlightBookingApp/1.0");
+    client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate, br");
 })
-.AddCookie(options =>
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate,
+    AllowAutoRedirect = true,
+    UseCookies = true
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
-builder.Services.AddScoped<SessionJwtAuthFilter>();
-
-// Add services to the container.
-builder.Services.AddControllersWithViews(options =>
-{
-    options.Filters.Add<SessionJwtAuthFilter>();
-    // options.Filters.Add<LoginStatusFilter>();
-});
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -65,10 +67,19 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddScoped<SessionJwtAuthFilter>();
+
+// Add services to the container.
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<SessionJwtAuthFilter>();
+});
+
 // Add services
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IMarkupCommissionRuleService, MarkupCommissionRuleService>();
+builder.Services.AddScoped<IAirlineService, AirlineService>();
 
 var app = builder.Build();
 
@@ -82,6 +93,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -30,6 +30,9 @@ public class SessionJwtAuthFilter : IActionFilter
         // Set the UserEmail view data
         string userEmail = "";
 
+        // Set the SessionExpiry view data
+        DateTime? sessionExpiry = null;
+
         // Check if the token is not empty
         if (!string.IsNullOrEmpty(token))
         {
@@ -54,7 +57,7 @@ public class SessionJwtAuthFilter : IActionFilter
                     ValidateAudience = true,
                     ValidAudience = _config["Jwt:Audience"],
                     ClockSkew = TimeSpan.Zero
-                }, out _);
+                }, out SecurityToken validatedToken);
 
                 isLoggedIn = true;
 
@@ -63,6 +66,9 @@ public class SessionJwtAuthFilter : IActionFilter
 
                 // Get email
                 userEmail = emailClaim?.Value ?? "";
+
+                // Get session expiry from the validated token
+                sessionExpiry = validatedToken.ValidTo;
 
                 // Set the user
                 context.HttpContext.User = principal;
@@ -80,6 +86,7 @@ public class SessionJwtAuthFilter : IActionFilter
         {
             controller.ViewData["IsLoggedIn"] = isLoggedIn;
             controller.ViewData["UserEmail"] = userEmail;
+            controller.ViewData["SessionExpiry"] = sessionExpiry;
         }
     }
 
