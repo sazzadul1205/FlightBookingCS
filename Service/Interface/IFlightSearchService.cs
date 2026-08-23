@@ -4,6 +4,6 @@ namespace FlightBookingCS.Service.Interface
 {
     public interface IFlightSearchService
     {
-        Task<FlightResultsViewModel> SearchFlightsAsync();
+        Task<FlightResultsViewModel> SearchFlightsAsync(FlightSearchRequest request);
     }
 }

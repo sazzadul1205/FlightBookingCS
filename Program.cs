@@ -81,6 +81,7 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IMarkupCommissionRuleService, MarkupCommissionRuleService>();
 builder.Services.AddScoped<IAirlineService, AirlineService>();
 builder.Services.AddScoped<IGetCitiesService, GetCitiesService>();
+builder.Services.AddScoped<IFlightSearchService, FlightSearchService>();
 
 var app = builder.Build();
 
