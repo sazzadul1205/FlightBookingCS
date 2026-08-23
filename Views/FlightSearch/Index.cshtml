@@ -4,194 +4,500 @@
     ViewData["Title"] = "Flight Search";
 }
 
-<div class="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-    <div class="overflow-hidden bg-white shadow-sm rounded-xl">
-        <!-- Header -->
-        <div class="flex flex-col gap-4 px-6 py-4 border-b border-gray-200 sm:flex-row sm:items-center sm:justify-between">
-            <h5 class="text-lg font-semibold text-gray-900">✈️ Flight Search</h5>
-            <div class="text-sm text-gray-500">
-                Search for airports and cities worldwide
+<!-- Helper function to extract city name -->
+@functions {
+    string ExtractCityName(string searchString)
+    {
+        if (string.IsNullOrEmpty(searchString)) return "";
+        var parts = searchString.Split(',');
+        return parts.Length > 1 ? parts[parts.Length - 2].Trim() : searchString;
+    }
+}
+
+<div class="min-h-screen flex items-center justify-center"
+     style="background-image: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80'); background-size: cover; background-position: center;">
+    
+    <div class="bg-white max-w-5xl p-6 rounded-2xl shadow-2xl w-full mx-4">
+        <div class="flex items-stretch gap-2">
+            <!-- From & To Container -->
+            <div class="flex-1 relative flex items-stretch gap-0 min-w-0">
+                <!-- From -->
+                <div class="flex-1 min-w-0">
+                    <div class="bg-white hover:bg-blue-50/90 rounded-xl p-3 shadow-md hover:shadow-xl border border-blue-100 hover:border-blue-200 cursor-pointer h-full"
+                         onclick="openDropdown('Origin')">
+                        <span class="text-[10px] font-semibold text-blue-500 uppercase tracking-wider">From</span>
+                        <h1 class="text-lg font-bold text-blue-900 truncate" id="originTitle">Loading...</h1>
+                        <p class="text-[11px] text-blue-600 truncate" id="originDisplay" title="Loading...">
+                            Loading...
+                        </p>
+                    </div>
+                    
+                    <!-- Origin Dropdown -->
+                    <div id="originDropdown" class="hidden absolute z-20 top-full left-0 mt-1 w-full bg-white rounded-xl shadow-lg border border-blue-100 p-3 max-h-60 overflow-y-auto">
+                        <input type="text"
+                               id="originSearch"
+                               placeholder="Search city or airport..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               oninput="handleCitySearch(this.value, 'Origin')"
+                               onkeydown="handleDropdownKeydown(event, 'Origin')"
+                               autofocus />
+                        <div id="originLoading" class="hidden text-blue-500 text-sm mt-2">Loading...</div>
+                        <ul id="originResults" class="mt-2 divide-y divide-gray-100">
+                            <li class="py-2 text-gray-400 text-sm">Type at least 2 characters to search</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Arrow Icon -->
+                <div class="flex-shrink-0 flex items-center justify-center px-1 z-10">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-lg border-2 border-white">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- To -->
+                <div class="flex-1 min-w-0">
+                    <div class="bg-white hover:bg-blue-50/90 rounded-xl p-3 shadow-md hover:shadow-xl border border-blue-100 hover:border-blue-200 cursor-pointer h-full"
+                         onclick="openDropdown('Destination')">
+                        <span class="text-[10px] font-semibold text-blue-500 uppercase tracking-wider pl-2">To</span>
+                        <h1 class="text-lg font-bold text-blue-900 truncate pl-2" id="destinationTitle">Loading...</h1>
+                        <p class="text-[11px] text-blue-600 truncate pl-2" id="destinationDisplay" title="Loading...">
+                            Loading...
+                        </p>
+                    </div>
+                    
+                    <!-- Destination Dropdown -->
+                    <div id="destinationDropdown" class="hidden absolute z-20 top-full left-0 mt-1 w-full bg-white rounded-xl shadow-lg border border-blue-100 p-3 max-h-60 overflow-y-auto">
+                        <input type="text"
+                               id="destinationSearch"
+                               placeholder="Search city or airport..."
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               oninput="handleCitySearch(this.value, 'Destination')"
+                               onkeydown="handleDropdownKeydown(event, 'Destination')"
+                               autofocus />
+                        <div id="destinationLoading" class="hidden text-blue-500 text-sm mt-2">Loading...</div>
+                        <ul id="destinationResults" class="mt-2 divide-y divide-gray-100">
+                            <li class="py-2 text-gray-400 text-sm">Type at least 2 characters to search</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Departure Date -->
+            <div class="flex-1 max-w-48 min-w-0 relative">
+                <div class="bg-white hover:bg-blue-50/90 rounded-xl p-3 shadow-md hover:shadow-xl border border-blue-100 hover:border-blue-200 cursor-pointer transition-all h-full"
+                     onclick="toggleDatePicker()">
+                    <span class="text-[10px] font-semibold text-blue-500 uppercase tracking-wider">Departure Date</span>
+                    <h1 class="text-base font-bold text-blue-900 truncate" id="selectedDateDisplay">Select Date</h1>
+                    <p class="text-[11px] text-blue-500 truncate" id="selectedDayDisplay">Choose a date</p>
+                </div>
+                
+                <!-- Date Picker -->
+                <div id="datePicker" class="hidden absolute z-30 top-full right-0 mt-2" style="min-width: 320px;">
+                    <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">‹</button>
+                            <span id="monthYearDisplay" class="font-semibold">July 2026</span>
+                            <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">›</button>
+                        </div>
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center">
+                            <!-- Days will be rendered by JavaScript -->
+                        </div>
+                        <div class="mt-4 flex justify-end gap-2 border-t pt-4">
+                            <button onclick="closeDatePicker()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+                            <button onclick="selectToday()" class="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">Today</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traveler & Class -->
+            <div class="flex-1 max-w-48 min-w-0">
+                <div class="relative bg-white hover:bg-blue-50/90 rounded-xl p-3 shadow-md hover:shadow-xl border border-blue-100 hover:border-blue-200 cursor-pointer h-full">
+                    <div onclick="toggleTravelerPicker()">
+                        <span class="text-[10px] font-semibold text-blue-500 uppercase tracking-wider">Traveler, Class</span>
+                        <h1 class="text-base font-bold text-blue-900 truncate" id="travelerDisplay">1 Traveler</h1>
+                        <p class="text-[11px] text-blue-500 truncate" id="classDisplay">Economy</p>
+                    </div>
+                    
+                    <!-- Traveler Picker -->
+                    <div id="travelerPicker" class="hidden absolute z-20 top-full right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 w-72">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-semibold">Adults</div>
+                                    <div class="text-sm text-gray-500">Age 12+</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button onclick="updateTraveler('adults', -1)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">-</button>
+                                    <span id="adultsCount" class="w-6 text-center font-semibold">1</span>
+                                    <button onclick="updateTraveler('adults', 1)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">+</button>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-semibold">Children</div>
+                                    <div class="text-sm text-gray-500">Age 2-12</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button onclick="updateTraveler('children', -1)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">-</button>
+                                    <span id="childrenCount" class="w-6 text-center font-semibold">0</span>
+                                    <button onclick="updateTraveler('children', 1)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">+</button>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <div class="font-semibold">Infants</div>
+                                    <div class="text-sm text-gray-500">Under 2</div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button onclick="updateTraveler('infants', -1)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">-</button>
+                                    <span id="infantsCount" class="w-6 text-center font-semibold">0</span>
+                                    <button onclick="updateTraveler('infants', 1)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">+</button>
+                                </div>
+                            </div>
+                            <div class="border-t pt-4">
+                                <div class="font-semibold mb-2">Class</div>
+                                <div class="flex gap-2">
+                                    <button onclick="selectClass('Economy')" class="class-btn px-4 py-2 rounded-lg bg-blue-600 text-white text-sm transition-colors">Economy</button>
+                                    <button onclick="selectClass('Business')" class="class-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm transition-colors">Business</button>
+                                </div>
+                            </div>
+                            <button onclick="closeTravelerPicker()" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Done</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Search Box -->
-        <div class="px-6 py-4 border-b border-gray-200">
-            <div class="flex flex-col gap-3 sm:flex-row">
-                <div class="flex-1">
-                    <input type="text"
-                           id="searchInput"
-                           placeholder="Search for cities (e.g., 'SI', 'New York')"
-                           autofocus
-                           class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-base focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
-                </div>
-                <button id="searchButton"
-                        onclick="searchCities()"
-                        class="inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    Search
-                </button>
-            </div>
-        </div>
+        <!-- Error Message -->
+        <div id="searchError" class="mt-4 text-red-500 text-sm text-center hidden"></div>
 
-        <!-- Results Area -->
-        <div class="px-6 py-4">
-            <div id="results">
-                <div class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">
-                    <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    Enter a search term to find cities
-                </div>
-            </div>
+        <!-- Search Button -->
+        <div class="mt-6 flex justify-center">
+            <button onclick="handleSearch()" id="searchButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors disabled:opacity-50">
+                Search Flights
+            </button>
         </div>
     </div>
 </div>
 
-<script>
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
-    const resultsDiv = document.getElementById('results');
 
-    // Search on Enter key
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchCities();
+@section Scripts { 
+<script>
+    // State
+    const state = {
+        origin: null, destination: null, date: null,
+        travelers: { adults: 1, children: 0, infants: 0, classType: 'Economy' },
+        field: null, timer: null, controller: null,
+        month: 0, year: 0, index: -1
+    };
+
+    // Utilities
+    const $ = id => document.getElementById(id);
+    const extractCity = s => {
+        if (!s) return '';
+        const parts = s.split(',');
+        return parts.length > 1 ? parts[parts.length - 2].trim() : s;
+    };
+    const formatDate = (d,m,y) => `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isPast = (d,m,y) => new Date(y,m,d) < new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+    const isToday = (d,m,y) => d === new Date().getDate() && m === new Date().getMonth() && y === new Date().getFullYear();
+    const getDateDisplay = (d,m,y) => {
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const date = new Date(y,m,d);
+        return { full: `${d} ${months[m]}'${String(y).slice(-2)}`, dayName: days[date.getDay()], day:d, month:m, year:y };
+    };
+
+    // Close all floating elements
+    const closeAll = () => {
+        ['originDropdown','destinationDropdown','datePicker','travelerPicker'].forEach(id => $(id)?.classList.add('hidden'));
+        state.field = null;
+        state.index = -1;
+    };
+
+    // Dropdown functions
+    const openDropdown = field => {
+        closeAll();
+        state.field = field;
+        const dropdown = $(field === 'Origin' ? 'originDropdown' : 'destinationDropdown');
+        const search = $(field === 'Origin' ? 'originSearch' : 'destinationSearch');
+        dropdown.classList.remove('hidden');
+        search.value = '';
+        search.focus();
+        state.index = -1;
+        $(field === 'Origin' ? 'originResults' : 'destinationResults').innerHTML = 
+            '<li class="py-2 text-gray-400 text-sm">Type at least 2 characters to search</li>';
+    };
+
+    const closeDropdowns = () => {
+        ['originDropdown','destinationDropdown'].forEach(id => $(id)?.classList.add('hidden'));
+        state.field = null;
+        state.index = -1;
+    };
+
+    // Keyboard navigation
+    const handleDropdownKeydown = (e, field) => {
+        const items = $(field === 'Origin' ? 'originResults' : 'destinationResults').querySelectorAll('li[data-city-id]');
+        switch(e.key) {
+            case 'ArrowDown': e.preventDefault(); if(items.length) state.index = Math.min(state.index+1, items.length-1); updateHighlight(field); break;
+            case 'ArrowUp': e.preventDefault(); if(items.length) state.index = Math.max(state.index-1, 0); updateHighlight(field); break;
+            case 'Enter': e.preventDefault(); if(state.index >= 0 && state.index < items.length) { const item = items[state.index]; selectCity(parseInt(item.dataset.cityId), item.dataset.cityCode, item.dataset.cityDisplay, field); } break;
+            case 'Escape': closeAll(); break;
         }
+    };
+
+    const updateHighlight = field => {
+        const items = $(field === 'Origin' ? 'originResults' : 'destinationResults').querySelectorAll('li[data-city-id]');
+        items.forEach((item, i) => {
+            item.className = i === state.index ? 'py-2 px-3 bg-blue-100 rounded-lg cursor-pointer transition-colors' : 
+                           'py-2 px-3 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors';
+            if(i === state.index) item.scrollIntoView({ block: 'nearest' });
+        });
+    };
+
+    // Click outside handler
+    document.addEventListener('click', e => {
+        const inside = el => el && (el.closest('#originDropdown') || el.closest('#destinationDropdown') || 
+                      el.closest('#datePicker') || el.closest('#travelerPicker') ||
+                      el.closest('[onclick*="openDropdown"]') || el.closest('[onclick="toggleDatePicker()"]') || 
+                      el.closest('[onclick="toggleTravelerPicker()"]'));
+        if(!inside(e.target)) closeAll();
     });
 
-    async function searchCities() {
-        const searchTerm = searchInput.value.trim();
-
-        if (!searchTerm) {
-            resultsDiv.innerHTML = `
-                    <div class="p-4 text-sm text-red-700 bg-red-100 rounded-lg">
-                        <svg class="inline-block w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Please enter a search term
-                    </div>
-                `;
+    // City search
+    const handleCitySearch = (query, field) => {
+        const results = $(field === 'Origin' ? 'originResults' : 'destinationResults');
+        const loading = $(field === 'Origin' ? 'originLoading' : 'destinationLoading');
+        
+        if(query.length <= 1) {
+            results.innerHTML = '<li class="py-2 text-gray-400 text-sm">Type at least 2 characters to search</li>';
+            state.index = -1;
             return;
         }
-
-        // Show loading state
-        searchButton.disabled = true;
-        searchButton.innerHTML = `
-                <svg class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Searching...
-            `;
-
-        resultsDiv.innerHTML = `
-                <div class="p-4 text-center text-gray-500">
-                    <svg class="inline-block w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Searching for cities...
-                </div>
-            `;
-
-        try {
-            const response = await fetch(`/FlightSearch/GetCities?search=${encodeURIComponent(searchTerm)}`);
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to fetch cities');
+        
+        state.timer && clearTimeout(state.timer);
+        state.controller && state.controller.abort();
+        loading.classList.remove('hidden');
+        
+        state.timer = setTimeout(async () => {
+            try {
+                state.controller = new AbortController();
+                const res = await fetch(`/FlightSearch/GetCities?search=${encodeURIComponent(query)}`, { signal: state.controller.signal });
+                const data = await res.json();
+                loading.classList.add('hidden');
+                
+                if(data.success && data.cities?.length) {
+                    results.innerHTML = data.cities.slice(0,20).map(c => {
+                        const name = extractCity(c.searchString);
+                        const display = c.searchString.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                        return `<li data-city-id="${c.id}" data-city-code="${c.airportCode}" data-city-display="${display}" onclick="selectCity(${c.id}, '${c.airportCode}', '${display}', '${field}')" class="py-2 px-3 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors"><div class="font-medium text-gray-800 truncate">${c.airportCode} - ${name}</div><div class="text-xs text-gray-500 truncate">${c.searchString}</div></li>`;
+                    }).join('');
+                    state.index = -1;
+                } else {
+                    results.innerHTML = '<li class="py-2 text-gray-500 text-sm">No cities found</li>';
+                }
+            } catch(e) {
+                if(e.name !== 'AbortError') results.innerHTML = '<li class="py-2 text-red-500 text-sm">Error loading cities</li>';
+                loading.classList.add('hidden');
             }
+        }, 300);
+    };
 
-            displayResults(data);
-        } catch (error) {
-            resultsDiv.innerHTML = `
-                    <div class="p-4 text-sm text-red-700 bg-red-100 rounded-lg">
-                        <svg class="inline-block w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Error: ${error.message}
-                    </div>
-                `;
-        } finally {
-            searchButton.disabled = false;
-            searchButton.innerHTML = `
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    Search
-                `;
+    const selectCity = (id, code, display, field) => {
+        const data = { id, code, display };
+        if(field === 'Origin') state.origin = data; else state.destination = data;
+        const parent = $(field === 'Origin' ? 'originDropdown' : 'destinationDropdown').parentElement;
+        parent.querySelector('h1').textContent = extractCity(display);
+        parent.querySelector('p').textContent = display;
+        parent.querySelector('p').title = display;
+        closeDropdowns();
+    };
+
+    // Airport initialization - FIXED
+    const fetchAirport = async (code) => {
+        try {
+            const res = await fetch(`/FlightSearch/GetCities?search=${code}`);
+            const data = await res.json();
+            if(data.success && data.cities?.length) {
+                const match = data.cities.find(c => c.airportCode.toUpperCase() === code.toUpperCase()) || data.cities[0];
+                return { id: match.id, code: match.airportCode, display: match.searchString };
+            }
+        } catch(e) { 
+            console.error('Error fetching airport:', e); 
         }
-    }
+        return null;
+    };
 
-    function displayResults(data) {
-        if (!data.success) {
-            resultsDiv.innerHTML = `
-                    <div class="p-4 text-sm text-red-700 bg-red-100 rounded-lg">
-                        <svg class="inline-block w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        ${data.message || 'An error occurred'}
-                    </div>
-                `;
-            return;
+    const initAirports = async () => {
+        // Fetch both airports in parallel
+        const [origin, dest] = await Promise.all([fetchAirport('DAC'), fetchAirport('CXB')]);
+        
+        if(origin) {
+            state.origin = origin;
+            $('originTitle').textContent = extractCity(origin.display);
+            $('originDisplay').textContent = origin.display;
+            $('originDisplay').title = origin.display;
         }
-
-        const cities = data.cities || [];
-
-        if (cities.length === 0) {
-            resultsDiv.innerHTML = `
-                    <div class="p-4 text-center text-gray-500 bg-gray-50 rounded-lg">
-                        <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        No cities found for "<strong>${searchInput.value.trim()}</strong>"
-                    </div>
-                `;
-            return;
+        
+        if(dest) {
+            state.destination = dest;
+            $('destinationTitle').textContent = extractCity(dest.display);
+            $('destinationDisplay').textContent = dest.display;
+            $('destinationDisplay').title = dest.display;
         }
+    };
 
-        // Build results table similar to your Markup & Commission page
-        let html = `
-                <div class="p-3 mb-4 text-sm text-green-700 bg-green-100 rounded-lg">
-                    <svg class="inline-block w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    ${data.message || `Found ${cities.length} cities`}
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">#</th>
-                                <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Airport Code</th>
-                                <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Search String</th>
-                                <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Flag</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-            `;
+    // Date Picker
+    const toggleDatePicker = () => {
+        const picker = $('datePicker');
+        if(picker.classList.contains('hidden')) {
+            closeAll();
+            picker.classList.remove('hidden');
+            state.month = state.date?.month || new Date().getMonth();
+            state.year = state.date?.year || new Date().getFullYear();
+            renderCalendar();
+        } else picker.classList.add('hidden');
+    };
 
-        cities.forEach((city, index) => {
-            const flagHtml = city.countryFlagUrl
-                ? `<img src="${city.countryFlagUrl}" alt="Flag" class="w-8 h-5 object-cover rounded" />`
-                : '<span class="text-xs text-gray-400">No flag</span>';
+    const closeDatePicker = () => $('datePicker')?.classList.add('hidden');
 
-            html += `
-                    <tr class="transition-colors duration-200 hover:bg-gray-50">
-                        <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">${index + 1}</td>
-                        <td class="px-4 py-3 text-sm font-medium text-blue-600 whitespace-nowrap">${city.airportCode}</td>
-                        <td class="px-4 py-3 text-sm text-gray-700">${city.searchString}</td>
-                        <td class="px-4 py-3 text-sm whitespace-nowrap">${flagHtml}</td>
-                    </tr>
-                `;
+    const renderCalendar = () => {
+        const grid = $('calendarGrid');
+        if(!grid) return;
+        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        $('monthYearDisplay').textContent = `${monthNames[state.month]} ${state.year}`;
+        
+        const firstDay = new Date(state.year, state.month, 1).getDay();
+        const daysInMonth = new Date(state.year, state.month + 1, 0).getDate();
+        
+        let html = ['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => `<div class="text-xs font-semibold text-gray-500 py-1">${d}</div>`).join('');
+        for(let i = 0; i < firstDay; i++) html += '<div></div>';
+        
+        for(let d = 1; d <= daysInMonth; d++) {
+            const past = isPast(d, state.month, state.year);
+            const today = isToday(d, state.month, state.year);
+            const selected = state.date && d === state.date.day && state.month === state.date.month && state.year === state.date.year;
+            let cls = 'py-2 rounded-lg text-center transition-colors ';
+            cls += past ? 'text-gray-300 cursor-not-allowed opacity-50' : selected ? 'bg-blue-600 text-white hover:bg-blue-700' : 'hover:bg-blue-100 cursor-pointer';
+            if(today && !selected && !past) cls += ' border-2 border-blue-500 font-semibold';
+            html += `<div ${past ? '' : `onclick="selectDate(${d}, ${state.month}, ${state.year})"`} class="${cls}">${d}</div>`;
+        }
+        grid.innerHTML = html;
+    };
+
+    const changeMonth = delta => {
+        state.month += delta;
+        if(state.month > 11) { state.month = 0; state.year++; }
+        else if(state.month < 0) { state.month = 11; state.year--; }
+        renderCalendar();
+    };
+
+    const selectDate = (d,m,y) => {
+        if(isPast(d,m,y)) return;
+        state.date = getDateDisplay(d,m,y);
+        $('selectedDateDisplay').textContent = state.date.full;
+        $('selectedDayDisplay').textContent = state.date.dayName;
+        closeDatePicker();
+    };
+
+    const selectToday = () => {
+        const today = new Date();
+        state.date = getDateDisplay(today.getDate(), today.getMonth(), today.getFullYear());
+        $('selectedDateDisplay').textContent = state.date.full;
+        $('selectedDayDisplay').textContent = state.date.dayName;
+        closeDatePicker();
+    };
+
+    // Traveler Picker
+    const toggleTravelerPicker = () => {
+        const picker = $('travelerPicker');
+        if(picker.classList.contains('hidden')) {
+            closeAll();
+            picker.classList.remove('hidden');
+            updateTravelerDisplay();
+        } else picker.classList.add('hidden');
+    };
+
+    const closeTravelerPicker = () => $('travelerPicker')?.classList.add('hidden');
+
+    const updateTraveler = (type, delta) => {
+        const val = state.travelers[type] + delta;
+        if(val < 0 || (type === 'adults' && val === 0)) return;
+        state.travelers[type] = val;
+        updateTravelerDisplay();
+    };
+
+    const updateTravelerDisplay = () => {
+        ['adults','children','infants'].forEach(t => $(`${t}Count`).textContent = state.travelers[t]);
+        const total = state.travelers.adults + state.travelers.children + state.travelers.infants;
+        $('travelerDisplay').textContent = total === 1 ? '1 Traveler' : `${total} Travelers`;
+        $('classDisplay').textContent = state.travelers.classType;
+        document.querySelectorAll('.class-btn').forEach(btn => {
+            btn.className = btn.textContent === state.travelers.classType ? 
+                'class-btn px-4 py-2 rounded-lg bg-blue-600 text-white text-sm transition-colors' : 
+                'class-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 text-sm transition-colors';
         });
+    };
 
-        html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
+    const selectClass = cls => {
+        state.travelers.classType = cls;
+        updateTravelerDisplay();
+    };
 
-        resultsDiv.innerHTML = html;
-    }
+    // Search
+    const handleSearch = () => {
+        const error = $('searchError');
+        error.classList.add('hidden');
+        error.textContent = '';
+        
+        if(!state.origin) return showError('Please select Origin');
+        if(!state.destination) return showError('Please select Destination');
+        if(state.origin.code === state.destination.code) return showError('Origin and Destination cannot be the same');
+        if(!state.date) return showError('Please select Departure Date');
+        
+        const btn = $('searchButton');
+        btn.disabled = true;
+        btn.textContent = 'Searching...';
+        
+        const params = new URLSearchParams({
+            origin: state.origin.code,
+            destination: state.destination.code,
+            departureDate: formatDate(state.date.day, state.date.month, state.date.year),
+            adults: state.travelers.adults,
+            children: state.travelers.children,
+            infants: state.travelers.infants,
+            class: state.travelers.classType,
+            journeyType: 1
+        });
+        window.location.href = `/search?${params.toString()}`;
+    };
+
+    const showError = msg => {
+        const error = $('searchError');
+        error.textContent = msg;
+        error.classList.remove('hidden');
+    };
+
+    // Initialize - FIXED
+    document.addEventListener('DOMContentLoaded', async () => {
+        const today = new Date();
+        state.date = getDateDisplay(today.getDate(), today.getMonth(), today.getFullYear());
+        $('selectedDateDisplay').textContent = state.date.full;
+        $('selectedDayDisplay').textContent = state.date.dayName;
+        state.month = today.getMonth();
+        state.year = today.getFullYear();
+        
+        // Wait for airports to load
+        await initAirports();
+        
+        console.log('Flight Search initialized');
+    });
+
+    // Escape key
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeAll(); });
 </script>
+}

@@ -22,13 +22,13 @@ namespace FlightBookingCS.Service
         {
             try
             {
-                if (search == null)
+                if (string.IsNullOrWhiteSpace(search))
                 {
                     _logger.LogError("The Search is Empty");
                     return CreateErrorResponse("Search Has Not been Provided");
                 }
 
-                var apiUrl = $"https://uthaotrip.com/api/Auto/GetCities/?input={search}";
+                var apiUrl = $"https://uthaotrip.com/api/Auto/GetCities/?input={Uri.EscapeDataString(search)}";
 
                 // 
                 _httpClient.DefaultRequestHeaders.Clear();
