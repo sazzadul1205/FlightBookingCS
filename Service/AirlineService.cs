@@ -1,8 +1,8 @@
 using FlightBookingCS.Service.Interface;
 using FlightBookingCS.ViewModel;
+using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
-using System.IO.Compression;
 
 namespace FlightBookingCS.Service;
 

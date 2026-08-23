@@ -80,6 +80,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IMarkupCommissionRuleService, MarkupCommissionRuleService>();
 builder.Services.AddScoped<IAirlineService, AirlineService>();
+builder.Services.AddScoped<IGetCitiesService, GetCitiesService>();
 
 var app = builder.Build();
 
