@@ -4,7 +4,7 @@
     Layout = "~/Views/Account/_AuthLayout.cshtml";
 }
 
-<form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="space-y-6">
+<form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="space-y-6" id="loginForm">
     @if (!ViewData.ModelState.IsValid)
     {
         <div asp-validation-summary="All" class="text-sm text-red-600 bg-red-50 rounded-lg p-3">
@@ -13,6 +13,7 @@
     <div>
         <label asp-for="Email" class="block text-sm font-medium text-gray-700 mb-1"></label>
         <input asp-for="Email"
+               autofocus
                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 outline-none"
                placeholder="Enter your email" />
         <span asp-validation-for="Email" class="text-sm text-red-600 mt-1 block"></span>
@@ -35,8 +36,16 @@
     </div>
 
     <button type="submit"
-            class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
-        Login
+            id="loginButton"
+            class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none disabled:hover:shadow-md">
+        <span id="buttonText">Login</span>
+        <span id="buttonSpinner" class="hidden">
+            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Logging in...
+        </span>
     </button>
 
     <div class="text-center">
@@ -52,4 +61,36 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            const button = document.getElementById('loginButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonSpinner = document.getElementById('buttonSpinner');
+
+            form.addEventListener('submit', function(e) {
+                // Check if form is valid before showing loading state
+                if (form.checkValidity()) {
+                    // Disable button
+                    button.disabled = true;
+                    
+                    // Hide text, show spinner
+                    buttonText.classList.add('hidden');
+                    buttonSpinner.classList.remove('hidden');
+                }
+            });
+
+            // Optional: Handle case where validation fails
+            // This prevents the button from staying in loading state if validation fails
+            const inputs = form.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('invalid', function() {
+                    // Reset button state if any input is invalid
+                    button.disabled = false;
+                    buttonText.classList.remove('hidden');
+                    buttonSpinner.classList.add('hidden');
+                });
+            });
+        });
+    </script>
 }

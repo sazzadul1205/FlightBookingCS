@@ -13,13 +13,16 @@ public class MarkupCommissionRuleController : Controller
 {
     private readonly IMarkupCommissionRuleService _markupCommissionService;
     private readonly IAirlineService _airlineService;
+    private readonly ILogger<MarkupCommissionRuleController> _logger;
 
     public MarkupCommissionRuleController(
         IMarkupCommissionRuleService markupCommissionService,
-        IAirlineService airlineService)
+        IAirlineService airlineService,
+        ILogger<MarkupCommissionRuleController> logger)
     {
         _markupCommissionService = markupCommissionService;
         _airlineService = airlineService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -85,9 +88,18 @@ public class MarkupCommissionRuleController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+    //[ValidateAntiForgeryToken]  // Ask Instructor (Tanim Bhai) 
     public async Task<IActionResult> Create(MarkupCommissionRuleCreateViewModel model)
     {
+        _logger.LogInformation("Frontend Hit Create");
+
+            if (model == null)
+        {
+            _logger.LogError("Model has returned Null");
+            return BadRequest("Model has returned Null");
+
+        }
+        
         if (ModelState.IsValid)
         {
             try
@@ -113,7 +125,9 @@ public class MarkupCommissionRuleController : Controller
                 return View(model);
             }
         }
+        
         ViewBag.ErrorMessage = "Please fix the validation errors.";
+        
         return View(model);
     }
 
@@ -155,7 +169,7 @@ public class MarkupCommissionRuleController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+    //[ValidateAntiForgeryToken]  // Ask Instructor (Tanim Bhai) 
     public async Task<IActionResult> Edit(MarkupCommissionRuleEditViewModel model)
     {
         if (ModelState.IsValid)
