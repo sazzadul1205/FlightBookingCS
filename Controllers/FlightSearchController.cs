@@ -25,6 +25,8 @@ namespace FlightBookingCS.Controllers
             return View();
         }
 
+        public ActionResult SearchResults() { return View(); }
+
         [HttpGet]
         public async Task<IActionResult> GetCities(string search)
         {

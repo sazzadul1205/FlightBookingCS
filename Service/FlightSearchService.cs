@@ -50,34 +50,34 @@ public class FlightSearchService : IFlightSearchService
             }
 
             // Read response as string directly
-            var jsonString = await response.Content.ReadAsStringAsync();
+            //var jsonString = await response.Content.ReadAsStringAsync();
 
             // Read as byte array
-            //var bytes = await response.Content.ReadAsByteArrayAsync();
+            var bytes = await response.Content.ReadAsByteArrayAsync();
 
-            //// Check if response is empty
-            //if (bytes == null || bytes.Length == 0)
-            //{
-            //    _logger.LogWarning("API returned empty response");
-            //    return CreateErrorViewModel("API returned empty response");
-            //}
+            // Check if response is empty
+            if (bytes == null || bytes.Length == 0)
+            {
+                _logger.LogWarning("API returned empty response");
+                return CreateErrorViewModel("API returned empty response");
+            }
 
-            //// Check if GZIP compressed (starts with 0x1F 0x8B)
-            //bool isGzip = bytes.Length > 2 && bytes[0] == 0x1F && bytes[1] == 0x8B;
+            // Check if GZIP compressed (starts with 0x1F 0x8B)
+            bool isGzip = bytes.Length > 2 && bytes[0] == 0x1F && bytes[1] == 0x8B;
 
-            //string jsonString;
+            string jsonString;
 
-            //// Decompress if compressed
-            //if (isGzip)
-            //{
-            //    _logger.LogInformation("Response is GZIP compressed. Decompressing...");
-            //    jsonString = DecompressGzip(bytes);
-            //}
-            //else
-            //{
-            //    // Not compressed, convert directly to string
-            //    jsonString = Encoding.UTF8.GetString(bytes);
-            //}
+            // Decompress if compressed
+            if (isGzip)
+            {
+                _logger.LogInformation("Response is GZIP compressed. Decompressing...");
+                jsonString = DecompressGzip(bytes);
+            }
+            else
+            {
+                // Not compressed, convert directly to string
+                jsonString = Encoding.UTF8.GetString(bytes);
+            }
 
             // Log preview for debugging
             var preview = jsonString.Length > 200 ? jsonString.Substring(0, 200) + "..." : jsonString;

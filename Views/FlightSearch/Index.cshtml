@@ -184,8 +184,7 @@
     </div>
 </div>
 
-
-@section Scripts { 
+@section Scripts {
 <script>
     // State
     const state = {
@@ -317,7 +316,7 @@
         closeDropdowns();
     };
 
-    // Airport initialization - FIXED
+    // Airport initialization
     const fetchAirport = async (code) => {
         try {
             const res = await fetch(`/FlightSearch/GetCities?search=${code}`);
@@ -333,7 +332,6 @@
     };
 
     const initAirports = async () => {
-        // Fetch both airports in parallel
         const [origin, dest] = await Promise.all([fetchAirport('DAC'), fetchAirport('CXB')]);
         
         if(origin) {
@@ -448,21 +446,19 @@
         updateTravelerDisplay();
     };
 
-    // Search
+    // ============================================================
+    // 🔥 UPDATED SEARCH – redirect to results page with URL params
+    // ============================================================
     const handleSearch = () => {
         const error = $('searchError');
         error.classList.add('hidden');
         error.textContent = '';
-        
-        if(!state.origin) return showError('Please select Origin');
-        if(!state.destination) return showError('Please select Destination');
-        if(state.origin.code === state.destination.code) return showError('Origin and Destination cannot be the same');
-        if(!state.date) return showError('Please select Departure Date');
-        
-        const btn = $('searchButton');
-        btn.disabled = true;
-        btn.textContent = 'Searching...';
-        
+
+        if (!state.origin) return showError('Please select Origin');
+        if (!state.destination) return showError('Please select Destination');
+        if (state.origin.code === state.destination.code) return showError('Origin and Destination cannot be the same');
+        if (!state.date) return showError('Please select Departure Date');
+
         const params = new URLSearchParams({
             origin: state.origin.code,
             destination: state.destination.code,
@@ -470,19 +466,21 @@
             adults: state.travelers.adults,
             children: state.travelers.children,
             infants: state.travelers.infants,
-            class: state.travelers.classType,
+            classType: state.travelers.classType,
             journeyType: 1
         });
-        window.location.href = `/search?${params.toString()}`;
+
+        window.location.href = `/FlightSearch/SearchResults?${params.toString()}`;
     };
 
     const showError = msg => {
         const error = $('searchError');
         error.textContent = msg;
         error.classList.remove('hidden');
+        setTimeout(() => error.classList.add('hidden'), 5000);
     };
 
-    // Initialize - FIXED
+    // Initialize
     document.addEventListener('DOMContentLoaded', async () => {
         const today = new Date();
         state.date = getDateDisplay(today.getDate(), today.getMonth(), today.getFullYear());
@@ -491,13 +489,10 @@
         state.month = today.getMonth();
         state.year = today.getFullYear();
         
-        // Wait for airports to load
         await initAirports();
-        
         console.log('Flight Search initialized');
     });
 
-    // Escape key
     document.addEventListener('keydown', e => { if(e.key === 'Escape') closeAll(); });
 </script>
 }
