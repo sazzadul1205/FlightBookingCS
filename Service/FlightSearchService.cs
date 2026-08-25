@@ -98,8 +98,21 @@ public class FlightSearchService : IFlightSearchService
                 return CreateErrorViewModel(apiResponse.Message ?? "API returned failure");
             }
 
+            string? igxKey = apiResponse.Payload?.FirstOrDefault()?.IGXKey;
+
+            if (!string.IsNullOrEmpty(igxKey))
+            {
+                await _cacheService.StoreAsyc(igxKey, apiResponse, request);
+                _logger.LogInformation("Cached flight data with IGXKey: {IGXKey}", igxKey);
+            }
+
+            // Map to ViewModel and include the IGXKey
+            var viewModel = MapToViewModel(apiResponse);
+
+            viewModel.IGXKey = igxKey; 
+
             // Map to ViewModel
-            return MapToViewModel(apiResponse);
+            return viewModel;
         }
         catch (HttpRequestException httpEx)  // Network error
         {

@@ -1,0 +1,273 @@
+﻿@model IEnumerable<FlightBookingCS.Service.Cache.CacheMetadata>
+@{
+    ViewData["Title"] = "Flight Search Cache Management";
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+            </svg>
+            Flight Search Cache
+        </h2>
+        <p class="mt-1 text-sm text-gray-600">Manage and monitor cached flight search results</p>
+    </div>
+
+    <!-- Alert Messages -->
+    <div id="alertContainer">
+        @if (TempData["Message"] != null)
+        {
+            <div class="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 flex items-center gap-3" role="alert">
+                <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                <span>@TempData["Message"]</span>
+                <button type="button" class="ml-auto text-blue-600 hover:text-blue-800" onclick="this.parentElement.remove()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        }
+    </div>
+
+    
+    <!-- Action Buttons -->
+    <div class="mb-6 flex flex-wrap gap-3">
+        <form asp-action="Cleanup" method="post" class="inline">
+            <button type="submit"
+                    class="inline-flex items-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Run Cleanup
+            </button>
+        </form>
+        <form asp-action="ClearAll" method="post" class="inline">
+            <button type="submit"
+                    class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                    onclick="return confirm('⚠️ Warning: This will permanently delete ALL cache entries. Are you sure?');">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Clear All
+            </button>
+        </form>
+    </div>
+
+    <!-- Cache Statistics -->
+    <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div class="flex items-center gap-2 text-sm text-gray-700">
+            <span class="font-semibold">Total entries:</span>
+            <span id="totalEntries" class="inline-flex items-center justify-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                @ViewBag.Count
+            </span>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IGXKey</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires At</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Size</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="cacheTableBody">
+                    @if (!Model.Any())
+                    {
+                        <tr id="emptyState">
+                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                </svg>
+                                <p class="text-sm">No cache entries found</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            var isExpired = item.ExpiresAt < DateTime.Now;
+                            <tr id="row-@item.IGXKey" class="hover:bg-gray-50 transition-colors duration-150">
+                                <td class="px-6 py-4">
+                                    <code class="text-xs bg-gray-100 px-2 py-1 rounded font-mono text-gray-800 break-all">@item.IGXKey</code>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">@($"{item.CreatedAt:yyyy-MM-dd HH:mm:ss}")</td>
+                                <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                    @if (isExpired)
+                                    {
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>
+                                            @item.ExpiresAt.ToString("yyyy-MM-dd HH:mm:ss")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-gray-600">@item.ExpiresAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                                    }
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
+                                    @if (item.FileSize >= 1024 * 1024)
+                                    {
+                                        <span>@((item.FileSize / (1024.0 * 1024.0)).ToString("F2")) MB</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@(item.FileSize / 1024) KB</span>
+                                    }
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button type="button"
+                                            class="delete-btn inline-flex items-center px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-sm font-medium rounded-lg transition-colors duration-150"
+                                            data-igxkey="@item.IGXKey"
+                                            onclick="deleteCacheEntry('@item.IGXKey', this)">
+                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer info -->
+    <div class="mt-6 text-xs text-gray-500 text-center">
+        <p>Cache entries are automatically cleaned up based on expiration policy</p>
+    </div>
+</div>
+
+<script>
+    function deleteCacheEntry(igxKey, buttonElement) {
+        if (!confirm('Delete this cache entry?')) {
+            return;
+        }
+
+        // Get the row element
+        const row = document.getElementById(`row-${igxKey}`);
+        const originalText = buttonElement.innerHTML;
+        
+        // Show loading state
+        buttonElement.innerHTML = `
+            <svg class="w-4 h-4 mr-1.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Deleting...
+        `;
+        buttonElement.disabled = true;
+
+        // Send DELETE request
+        fetch(`/CacheManagement/Delete?igxKey=${encodeURIComponent(igxKey)}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the row with animation
+                if (row) {
+                    row.style.transition = 'opacity 0.3s ease';
+                    row.style.opacity = '0';
+                    setTimeout(() => {
+                        row.remove();
+                        updateTotalCount(-1);
+                        
+                        // Check if table is empty
+                        const tbody = document.getElementById('cacheTableBody');
+                        if (tbody.children.length === 0) {
+                            tbody.innerHTML = `
+                                <tr id="emptyState">
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                        </svg>
+                                        <p class="text-sm">No cache entries found</p>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                        
+                        // Show success message
+                        showAlert(`Cache entry '${igxKey}' deleted successfully.`, 'success');
+                    }, 300);
+                }
+            } else {
+                // Restore button state on error
+                buttonElement.innerHTML = originalText;
+                buttonElement.disabled = false;
+                showAlert(data.message || `Failed to delete entry '${igxKey}'.`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            buttonElement.innerHTML = originalText;
+            buttonElement.disabled = false;
+            showAlert(`An error occurred while deleting '${igxKey}'.`, 'error');
+        });
+    }
+
+    function updateTotalCount(delta) {
+        const countElement = document.getElementById('totalEntries');
+        const currentCount = parseInt(countElement.textContent);
+        const newCount = currentCount + delta;
+        countElement.textContent = newCount >= 0 ? newCount : 0;
+    }
+
+    function showAlert(message, type = 'success') {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertDiv = document.createElement('div');
+        
+        const colors = {
+            success: 'bg-green-50 border-green-200 text-green-800',
+            error: 'bg-red-50 border-red-200 text-red-800',
+            info: 'bg-blue-50 border-blue-200 text-blue-800'
+        };
+        
+        alertDiv.className = `mb-6 p-4 rounded-lg border flex items-center gap-3 ${colors[type] || colors.info}`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            <span>${message}</span>
+            <button type="button" class="ml-auto text-current hover:opacity-75" onclick="this.parentElement.remove()">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        `;
+        
+        // Remove existing alerts
+        const existingAlerts = alertContainer.querySelectorAll('[role="alert"]');
+        existingAlerts.forEach(alert => alert.remove());
+        
+        alertContainer.prepend(alertDiv);
+        
+        // Auto dismiss after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.style.transition = 'opacity 0.3s ease';
+                alertDiv.style.opacity = '0';
+                setTimeout(() => alertDiv.remove(), 300);
+            }
+        }, 5000);
+    }
+</script>

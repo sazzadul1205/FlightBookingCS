@@ -28,16 +28,22 @@
                             </a>
                         </div>
                         <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                            <a class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150"
-                               asp-area="" asp-controller="Home" asp-action="Index">
+                            <a class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150" asp-area="" asp-controller="Home" asp-action="Index">
                                 Home
+                            </a>
+                            <a class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150" asp-area="" asp-controller="FlightSearch" asp-action="Index">
+                                Flight Search
                             </a>
 
                             @if (isLoggedIn)
                             {
-                                 <a class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150"
-                               asp-area="" asp-controller="MarkupCommissionRule" asp-action="Index">
+                            <a class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150" asp-area="" asp-controller="MarkupCommissionRule" asp-action="Index">
                                 Manage Rule
+                            </a>
+
+
+                            <a class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150" asp-area="" asp-controller="CacheManagement" asp-action="Index">
+                                    Manage Cache
                             </a>
                             }
                         </div>

@@ -1,9 +1,11 @@
 ﻿namespace FlightBookingCS.ViewModel;
+
 public class FlightResultsViewModel
 {
     public List<FlightResultItem> Flights { get; set; } = new();
     public bool HasMore { get; set; }
     public int TotalCount { get; set; }
+    public string? IGXKey { get; set; }
 }
 public class FlightResultItem
 {
