@@ -90,3 +90,47 @@ public class FareDetailItem
     public string? Text { get; set; }
     public string? OtherText { get; set; }
 }
+
+public class FilterOptions
+{
+    public PriceRange PriceRange { get; set; } = new();
+    public List<string> FareTypes { get; set; } = new();
+    public List<string> Airlines { get; set; } = new();
+    public List<string> AirlineCodes { get; set; } = new();
+    public List<string?> Aircraft { get; set; } = new();
+    public List<string?> BaggageOptions { get; set; } = new();
+    public List<int> OnwardFlightStops { get; set; } = new();
+    public List<int> ReturnFlightStops { get; set; } = new();
+    public List<TimeRange> OnwardDepartTimes { get; set; } = new();
+    public List<TimeRange> ReturnDepartTimes { get; set; } = new();
+    public List<TimeRange> OnwardArrivalTimes { get; set; } = new();
+    public List<TimeRange> ReturnArrivalTimes { get; set; } = new();
+    public List<DurationRange> OnwardTransitHours { get; set; } = new();
+    public List<DurationRange> ReturnTransitHours { get; set; } = new();
+    public List<DurationRange> OnwardFlyingTimes { get; set; } = new();
+    public List<DurationRange> ReturnFlyingTimes { get; set; } = new();
+    public List<string> OnwardLayoverAirports { get; set; } = new();
+    public List<string> ReturnLayoverAirports { get; set; } = new();
+    public List<string> OnwardDestinationAirports { get; set; } = new();
+    public List<string> ReturnDestinationAirports { get; set; } = new();
+}
+
+public class PriceRange
+{
+    public decimal Min { get; set; }
+    public decimal Max { get; set; }
+}
+
+public class TimeRange
+{
+    public string Name { get; set; } = string.Empty;
+    public TimeSpan From { get; set; }
+    public TimeSpan To { get; set; }
+}
+
+public class DurationRange
+{
+    public string Name { get; set; } = string.Empty;
+    public int FromHours { get; set; }
+    public int ToHours { get; set; }
+}

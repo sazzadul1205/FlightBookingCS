@@ -49,7 +49,7 @@
                 </div>
 
                 <!-- Arrow Icon -->
-                <div class="flex-shrink-0 flex items-center justify-center px-1 z-10">
+                <div class="shrink-0 flex items-center justify-center px-1 z-10">
                     <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-lg border-2 border-white">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -92,24 +92,6 @@
                     <span class="text-[10px] font-semibold text-blue-500 uppercase tracking-wider">Departure Date</span>
                     <h1 class="text-base font-bold text-blue-900 truncate" id="selectedDateDisplay">Select Date</h1>
                     <p class="text-[11px] text-blue-500 truncate" id="selectedDayDisplay">Choose a date</p>
-                </div>
-                
-                <!-- Date Picker -->
-                <div id="datePicker" class="hidden absolute z-30 top-full right-0 mt-2" style="min-width: 320px;">
-                    <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">‹</button>
-                            <span id="monthYearDisplay" class="font-semibold">July 2026</span>
-                            <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">›</button>
-                        </div>
-                        <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center">
-                            <!-- Days will be rendered by JavaScript -->
-                        </div>
-                        <div class="mt-4 flex justify-end gap-2 border-t pt-4">
-                            <button onclick="closeDatePicker()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
-                            <button onclick="selectToday()" class="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">Today</button>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -184,6 +166,35 @@
     </div>
 </div>
 
+<!-- Date Picker Modal Overlay -->
+<div id="datePickerOverlay" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 backdrop-blur-sm" onclick="closeDatePicker()">
+    <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-6 max-w-sm w-full mx-4" onclick="event.stopPropagation()">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Select Date</h3>
+            <button onclick="closeDatePicker()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <div class="flex justify-between items-center mb-4">
+            <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">‹</button>
+            <span id="monthYearDisplay" class="font-semibold text-lg">July 2026</span>
+            <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">›</button>
+        </div>
+        
+        <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center">
+            <!-- Days will be rendered by JavaScript -->
+        </div>
+        
+        <div class="mt-4 flex justify-between gap-2 border-t pt-4">
+            <button onclick="closeDatePicker()" class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+            <button onclick="selectToday()" class="px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">Today</button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
 <script>
     // State
@@ -213,7 +224,7 @@
 
     // Close all floating elements
     const closeAll = () => {
-        ['originDropdown','destinationDropdown','datePicker','travelerPicker'].forEach(id => $(id)?.classList.add('hidden'));
+        ['originDropdown','destinationDropdown','travelerPicker'].forEach(id => $(id)?.classList.add('hidden'));
         state.field = null;
         state.index = -1;
     };
@@ -258,13 +269,15 @@
         });
     };
 
-    // Click outside handler
+    // Click outside handler for dropdowns
     document.addEventListener('click', e => {
         const inside = el => el && (el.closest('#originDropdown') || el.closest('#destinationDropdown') || 
-                      el.closest('#datePicker') || el.closest('#travelerPicker') ||
+                      el.closest('#datePickerOverlay') || el.closest('#travelerPicker') ||
                       el.closest('[onclick*="openDropdown"]') || el.closest('[onclick="toggleDatePicker()"]') || 
                       el.closest('[onclick="toggleTravelerPicker()"]'));
-        if(!inside(e.target)) closeAll();
+        if(!inside(e.target)) {
+            closeAll();
+        }
     });
 
     // City search
@@ -349,19 +362,28 @@
         }
     };
 
-    // Date Picker
+    // ============================================================
+    // 🔥 UPDATED DATE PICKER - Centered Modal
+    // ============================================================
     const toggleDatePicker = () => {
-        const picker = $('datePicker');
-        if(picker.classList.contains('hidden')) {
+        const overlay = $('datePickerOverlay');
+        if(overlay.classList.contains('hidden')) {
             closeAll();
-            picker.classList.remove('hidden');
+            overlay.classList.remove('hidden');
             state.month = state.date?.month || new Date().getMonth();
             state.year = state.date?.year || new Date().getFullYear();
             renderCalendar();
-        } else picker.classList.add('hidden');
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
+        } else {
+            closeDatePicker();
+        }
     };
 
-    const closeDatePicker = () => $('datePicker')?.classList.add('hidden');
+    const closeDatePicker = () => {
+        $('datePickerOverlay')?.classList.add('hidden');
+        document.body.style.overflow = '';
+    };
 
     const renderCalendar = () => {
         const grid = $('calendarGrid');
@@ -446,9 +468,7 @@
         updateTravelerDisplay();
     };
 
-    // ============================================================
-    // 🔥 UPDATED SEARCH – redirect to results page with URL params
-    // ============================================================
+    // Search function - redirect to results page with URL params
     const handleSearch = () => {
         const error = $('searchError');
         error.classList.add('hidden');
@@ -493,6 +513,11 @@
         console.log('Flight Search initialized');
     });
 
-    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeAll(); });
+    document.addEventListener('keydown', e => { 
+        if(e.key === 'Escape') {
+            closeAll();
+            closeDatePicker();
+        }
+    });
 </script>
 }
