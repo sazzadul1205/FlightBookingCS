@@ -1,5 +1,5 @@
-﻿@{
-    ViewData["Title"] = "Flight Results";
+﻿﻿@{
+ViewData["Title"] = "Flight Results";
 }
 
 <div class="min-h-screen bg-gray-50">
@@ -722,11 +722,11 @@
             const airlinesContainer = document.getElementById('airlinesFilter');
             if (options.airlines && options.airlines.length) {
                 airlinesContainer.innerHTML = options.airlines.map(airline => `
-                        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:text-blue-600 transition-colors">
-                            <input type="checkbox" value="${airline}" onchange="applyFilters()" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
-                            ${airline}
-                        </label>
-                    `).join('');
+                                <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:text-blue-600 transition-colors">
+                                    <input type="checkbox" value="${airline}" onchange="applyFilters()" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
+                                    ${airline}
+                                </label>
+                            `).join('');
             } else {
                 airlinesContainer.innerHTML = '<p class="text-sm text-gray-400">No airlines available</p>';
             }
@@ -735,11 +735,11 @@
             const baggageContainer = document.getElementById('baggageFilter');
             if (options.baggageOptions && options.baggageOptions.length) {
                 baggageContainer.innerHTML = options.baggageOptions.map(b => `
-                        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:text-blue-600 transition-colors">
-                            <input type="checkbox" value="${b}" onchange="applyFilters()" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
-                            ${b}
-                        </label>
-                    `).join('');
+                                <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:text-blue-600 transition-colors">
+                                    <input type="checkbox" value="${b}" onchange="applyFilters()" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" />
+                                    ${b}
+                                </label>
+                            `).join('');
             } else {
                 baggageContainer.innerHTML = '<p class="text-sm text-gray-400">No baggage options</p>';
             }
@@ -788,7 +788,6 @@
             if (show) {
                 loadingEl.classList.remove('hidden');
                 resultsEl.classList.add('opacity-50', 'pointer-events-none');
-                // Store original content to restore if needed
             } else {
                 loadingEl.classList.add('hidden');
                 resultsEl.classList.remove('opacity-50', 'pointer-events-none');
@@ -797,10 +796,10 @@
 
         async function applyFilters() {
             if (!state.igxKey) return;
-            
+
             const filterData = getFilterData();
             const hasFilters = Object.keys(filterData).some(k => k !== 'igxKey');
-            
+
             if (!hasFilters) {
                 // Restore original flights
                 if (state.originalFlights && state.originalFlights.length) {
@@ -848,10 +847,10 @@
                 // Show error but keep existing results
                 const resultsEl = document.getElementById('flightResults');
                 const errorHtml = `
-                    <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
-                        ❌ Failed to apply filters: ${e.message}
-                    </div>
-                `;
+                            <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
+                                ❌ Failed to apply filters: ${e.message}
+                            </div>
+                        `;
                 // Insert error at top of results
                 resultsEl.insertAdjacentHTML('afterbegin', errorHtml);
                 setTimeout(() => {
@@ -871,7 +870,7 @@
             document.getElementById('maxPrice').value = '';
             document.getElementById('clearFilters').classList.add('hidden');
             document.getElementById('filterCount').textContent = '0';
-            
+
             // Restore original flights
             if (state.originalFlights && state.originalFlights.length) {
                 state.flights = state.originalFlights;
@@ -970,48 +969,72 @@
             }
         }
 
-        // ---------- displayFlights ----------
         function displayFlights(flights) {
             const count = flights.length;
             const container = $('flightResults');
 
             if (count === 0) {
                 container.innerHTML = `
-                        <div class="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-dashed border-yellow-300 text-yellow-700 p-12 rounded-2xl text-center">
-                            <div class="text-6xl mb-4">✈️</div>
-                            <p class="text-2xl font-bold">No flights found</p>
-                            <p class="text-sm mt-2 text-yellow-600">${state.isFiltering ? 'Try adjusting your filters' : 'Try changing your search criteria or dates'}</p>
-                            ${state.isFiltering ? `
-                                <button onclick="clearAllFilters()" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">
-                                    Clear Filters
-                                </button>
-                            ` : ''}
-                        </div>
-                    `;
+                                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-dashed border-yellow-300 text-yellow-700 p-12 rounded-2xl text-center">
+                                    <div class="text-6xl mb-4">✈️</div>
+                                    <p class="text-2xl font-bold">No flights found</p>
+                                    <p class="text-sm mt-2 text-yellow-600">${state.isFiltering ? 'Try adjusting your filters' : 'Try changing your search criteria or dates'}</p>
+                                    ${state.isFiltering ? `
+                                        <button onclick="clearAllFilters()" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors">
+                                            Clear Filters
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            `;
                 return;
             }
 
             let html = `
-                    <div class="flex items-center justify-between mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                                <span>✈️</span> ${count} flight${count > 1 ? 's' : ''} found
-                            </h2>
-                            <p class="text-sm text-gray-500 mt-1">${state.isFiltering ? '🎯 Filtered results' : 'All available flights'}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs text-gray-400">Best price</span>
-                            <p class="text-lg font-bold text-blue-600">$${Math.min(...flights.map(f => f.fareBreakdown?.[0]?.totalFare || 0)).toFixed(2)}</p>
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                `;
+                            <div class="flex items-center justify-between mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                                        <span>✈️</span> ${count} flight${count > 1 ? 's' : ''} found
+                                    </h2>
+                                    <p class="text-sm text-gray-500 mt-1">${state.isFiltering ? '🎯 Filtered results' : 'All available flights'}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-gray-400">Best price</span>
+                                    <p class="text-lg font-bold text-blue-600">$${Math.min(...flights.map(f => {
+                const fare = f.fareBreakdown?.[0] || {};
+                // Use NewBaseFare if available, else original totalFare
+                return f.newBaseFare > 0 ? f.newBaseFare + fare.totalTax : fare.totalFare || 0;
+            })).toFixed(2)}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                        `;
 
             flights.forEach((flight, idx) => {
                 const firstSegment = flight.onwards?.[0] || {};
                 const fare = flight.fareBreakdown?.[0] || {};
                 const travelTime = flight.totalTravelTimes?.[0] || {};
 
+                // --- NEW PRICING CALCULATIONS ---
+                const baseFare = fare.baseFare || 0;
+                const totalTax = fare.totalTax || 0;
+                const totalFare = fare.totalFare || 0;
+                const apiDiscount = fare.apiDiscount || 0;
+                const fees = fare.fees || 0;
+
+                // New pricing from backend
+                const newBaseFare = flight.newBaseFare || 0;
+                const newDiscount = flight.newDiscount || 0;
+
+                // Calculate Gross Fare = NewBaseFare + TotalTax + NewDiscount
+                const grossFare = newBaseFare > 0 ? newBaseFare + totalTax + newDiscount : totalFare;
+
+                // Calculate Net Fare = NewBaseFare + TotalTax
+                const netFare = newBaseFare > 0 ? newBaseFare + totalTax : totalFare;
+
+                // Determine if pricing is applied (user logged in with rules)
+                const hasPricing = newBaseFare > 0;
+
+                // --- REST OF THE FLIGHT DATA ---
                 const origin = firstSegment.origin || 'N/A';
                 const dest = firstSegment.destination || 'N/A';
                 const originName = firstSegment.originAirPortName?.split(',')[0] || origin;
@@ -1034,11 +1057,6 @@
                 const layoverTime = travelTime.totalLayoverTime || '0';
                 const segmentCount = travelTime.segmentCount || 1;
 
-                const totalFare = fare.totalFare || 0;
-                const baseFare = fare.baseFare || 0;
-                const totalTax = fare.totalTax || 0;
-                const apiDiscount = fare.apiDiscount || 0;
-                const fees = fare.fees || 0;
                 const passengerType = fare.passengerType || flight.passengerType || 'ADT';
                 const noOfPassenger = fare.noOfPassenger || 1;
 
@@ -1061,144 +1079,161 @@
                 if (brandedInfo.change?.text) features.push({ icon: '🔄', label: 'Change', text: brandedInfo.change.text });
                 if (brandedInfo.cancellation?.text) features.push({ icon: '❌', label: 'Cancel', text: brandedInfo.cancellation.text });
 
-                const perPassenger = noOfPassenger > 0 ? (totalFare / noOfPassenger).toFixed(2) : totalFare.toFixed(2);
+                const perPassenger = noOfPassenger > 0 ? (grossFare / noOfPassenger).toFixed(2) : grossFare.toFixed(2);
+                const originalPerPassenger = noOfPassenger > 0 ? (totalFare / noOfPassenger).toFixed(2) : totalFare.toFixed(2);
 
                 html += `
-                        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden group">
-                            <!-- Airline & Route Header -->
-                            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 flex flex-wrap items-center justify-between gap-2">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
-                                        ${carrierCode.substring(0, 2) || '✈'}
-                                    </div>
-                                    <div>
-                                        <div class="text-white font-semibold text-lg">${carrier}</div>
-                                        <div class="text-blue-100 text-xs flex flex-wrap items-center gap-2">
-                                            <span>${carrierCode}${flightNumber}</span>
-                                            <span>•</span>
-                                            <span>${equipment}</span>
-                                            <span>•</span>
-                                            <span>${cabinClass}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    ${isRefundable ? '<span class="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium">✅ Refundable</span>' : '<span class="bg-red-500 text-white text-xs px-3 py-1 rounded-full font-medium">❌ Non-refundable</span>'}
-                                    ${isBookable ? '<span class="bg-blue-400 text-white text-xs px-3 py-1 rounded-full font-medium">✈️ Bookable</span>' : ''}
-                                </div>
-                            </div>
-
-                            <!-- Main Flight Info -->
-                            <div class="p-5">
-                                <div class="flex flex-wrap items-center justify-between gap-4">
-                                    <!-- Origin -->
-                                    <div class="text-center min-w-[80px]">
-                                        <div class="text-3xl font-bold text-gray-800">${origin}</div>
-                                        <div class="text-sm font-medium text-gray-700">${depTime}</div>
-                                        <div class="text-xs text-gray-400">${depDate}</div>
-                                        <div class="text-xs text-gray-500 truncate max-w-[100px]" title="${originName}">${originName}</div>
-                                    </div>
-
-                                    <!-- Flight Path -->
-                                    <div class="flex-1 flex flex-col items-center px-4 min-w-[100px]">
-                                        <div class="flex items-center gap-3 w-full">
-                                            <div class="flex-1 h-0.5 bg-gradient-to-r from-blue-300 to-indigo-300 relative">
-                                                <div class="absolute -top-1 left-0 w-2 h-2 rounded-full bg-blue-400"></div>
-                                                <div class="absolute -top-1 right-0 w-2 h-2 rounded-full bg-indigo-500"></div>
+                                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden group">
+                                    <!-- Airline & Route Header -->
+                                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 flex flex-wrap items-center justify-between gap-2">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
+                                                ${carrierCode.substring(0, 2) || '✈'}
                                             </div>
-                                            <div class="shrink-0">
-                                                <svg class="w-5 h-5 text-indigo-500 transform rotate-45 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                                                </svg>
+                                            <div>
+                                                <div class="text-white font-semibold text-lg">${carrier}</div>
+                                                <div class="text-blue-100 text-xs flex flex-wrap items-center gap-2">
+                                                    <span>${carrierCode}${flightNumber}</span>
+                                                    <span>•</span>
+                                                    <span>${equipment}</span>
+                                                    <span>•</span>
+                                                    <span>${cabinClass}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="flex flex-wrap items-center justify-center gap-2 mt-1">
-                                            <span class="text-xs font-semibold text-gray-600">${duration}</span>
-                                            <span class="text-xs text-gray-300">•</span>
-                                            <span class="text-xs font-medium text-indigo-600">
-                                                ${stops === 0 ? '✈️ Non-stop' : `🛑 ${stops} stop${stops > 1 ? 's' : ''}`}
-                                                ${layoverTime > 0 ? ` (${layoverTime}h layover)` : ''}
-                                            </span>
-                                            ${segmentCount > 1 ? `<span class="text-xs text-gray-400">• ${segmentCount} segments</span>` : ''}
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            ${isRefundable ? '<span class="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium">✅ Refundable</span>' : '<span class="bg-red-500 text-white text-xs px-3 py-1 rounded-full font-medium">❌ Non-refundable</span>'}
+                                            ${isBookable ? '<span class="bg-blue-400 text-white text-xs px-3 py-1 rounded-full font-medium">✈️ Bookable</span>' : ''}
+                                            ${hasPricing ? '<span class="bg-yellow-400 text-gray-800 text-xs px-3 py-1 rounded-full font-medium">🏷️ Special Pricing</span>' : ''}
                                         </div>
-                                        <div class="text-xs text-gray-400 mt-0.5">${operatingCarrier}</div>
                                     </div>
 
-                                    <!-- Destination -->
-                                    <div class="text-center min-w-[80px]">
-                                        <div class="text-3xl font-bold text-gray-800">${dest}</div>
-                                        <div class="text-sm font-medium text-gray-700">${arrTime}</div>
-                                        <div class="text-xs text-gray-400">${arrDate}</div>
-                                        <div class="text-xs text-gray-500 truncate max-w-[100px]" title="${destName}">${destName}</div>
-                                    </div>
-                                </div>
+                                    <!-- Main Flight Info -->
+                                    <div class="p-5">
+                                        <div class="flex flex-wrap items-center justify-between gap-4">
+                                            <!-- Origin -->
+                                            <div class="text-center min-w-[80px]">
+                                                <div class="text-3xl font-bold text-gray-800">${origin}</div>
+                                                <div class="text-sm font-medium text-gray-700">${depTime}</div>
+                                                <div class="text-xs text-gray-400">${depDate}</div>
+                                                <div class="text-xs text-gray-500 truncate max-w-[100px]" title="${originName}">${originName}</div>
+                                            </div>
 
-                                <!-- Flight Details Grid -->
-                                <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                                        <span class="text-blue-400">🛄</span>
-                                        <span class="font-medium truncate" title="${baggageAllowance}">${baggageAllowance}</span>
-                                    </div>
-                                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                                        <span class="text-blue-400">🎫</span>
-                                        <span>${bookingCode} • ${fareBasis}</span>
-                                    </div>
-                                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                                        <span class="text-blue-400">👤</span>
-                                        <span>${noOfPassenger} × ${passengerType}</span>
-                                    </div>
-                                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                                        <span class="text-blue-400">📋</span>
-                                        <span>${tripType} • ${fareType}</span>
-                                    </div>
-                                </div>
-
-                                <!-- Branded Fare Features -->
-                                ${features.length > 0 ? `
-                                        <div class="mt-4 pt-3 border-t border-dashed border-gray-200">
-                                            <div class="flex flex-wrap gap-3">
-                                                ${features.map(f => `
-                                                    <div class="flex items-center gap-1.5 bg-blue-50 px-3 py-1.5 rounded-full text-xs">
-                                                        <span>${f.icon}</span>
-                                                        <span class="font-medium text-gray-700">${f.label}:</span>
-                                                        <span class="text-gray-600">${f.text}</span>
+                                            <!-- Flight Path -->
+                                            <div class="flex-1 flex flex-col items-center px-4 min-w-[100px]">
+                                                <div class="flex items-center gap-3 w-full">
+                                                    <div class="flex-1 h-0.5 bg-gradient-to-r from-blue-300 to-indigo-300 relative">
+                                                        <div class="absolute -top-1 left-0 w-2 h-2 rounded-full bg-blue-400"></div>
+                                                        <div class="absolute -top-1 right-0 w-2 h-2 rounded-full bg-indigo-500"></div>
                                                     </div>
-                                                `).join('')}
+                                                    <div class="shrink-0">
+                                                        <svg class="w-5 h-5 text-indigo-500 transform rotate-45 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                <div class="flex flex-wrap items-center justify-center gap-2 mt-1">
+                                                    <span class="text-xs font-semibold text-gray-600">${duration}</span>
+                                                    <span class="text-xs text-gray-300">•</span>
+                                                    <span class="text-xs font-medium text-indigo-600">
+                                                        ${stops === 0 ? '✈️ Non-stop' : `🛑 ${stops} stop${stops > 1 ? 's' : ''}`}
+                                                        ${layoverTime > 0 ? ` (${layoverTime}h layover)` : ''}
+                                                    </span>
+                                                    ${segmentCount > 1 ? `<span class="text-xs text-gray-400">• ${segmentCount} segments</span>` : ''}
+                                                </div>
+                                                <div class="text-xs text-gray-400 mt-0.5">${operatingCarrier}</div>
+                                            </div>
+
+                                            <!-- Destination -->
+                                            <div class="text-center min-w-[80px]">
+                                                <div class="text-3xl font-bold text-gray-800">${dest}</div>
+                                                <div class="text-sm font-medium text-gray-700">${arrTime}</div>
+                                                <div class="text-xs text-gray-400">${arrDate}</div>
+                                                <div class="text-xs text-gray-500 truncate max-w-[100px]" title="${destName}">${destName}</div>
                                             </div>
                                         </div>
-                                    ` : ''}
-                            </div>
 
-                            <!-- Footer: Price & Action -->
-                            <div class="bg-gray-50 px-6 py-3 flex flex-wrap items-center justify-between border-t border-gray-100 gap-2">
-                                <div class="flex flex-wrap items-center gap-4">
-                                    <div>
-                                        <div class="text-xs text-gray-500">Per passenger</div>
-                                        <div class="text-lg font-bold text-blue-600">$${perPassenger}</div>
-                                    </div>
-                                    <div class="h-8 w-px bg-gray-300"></div>
-                                    <div>
-                                        <div class="text-xs text-gray-500">Total</div>
-                                        <div class="text-2xl font-bold text-gray-800">$${totalFare.toFixed(2)}</div>
-                                    </div>
-                                    ${apiDiscount > 0 ? `
-                                            <div class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                                                💰 Saved $${apiDiscount.toFixed(2)}
+                                        <!-- Flight Details Grid -->
+                                        <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                                <span class="text-blue-400">🛄</span>
+                                                <span class="font-medium truncate" title="${baggageAllowance}">${baggageAllowance}</span>
                                             </div>
-                                        ` : ''}
-                                    ${fees > 0 ? `
-                                            <div class="text-xs text-gray-400">+ $${fees.toFixed(2)} fees</div>
-                                        ` : ''}
+                                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                                <span class="text-blue-400">🎫</span>
+                                                <span>${bookingCode} • ${fareBasis}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                                <span class="text-blue-400">👤</span>
+                                                <span>${noOfPassenger} × ${passengerType}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                                <span class="text-blue-400">📋</span>
+                                                <span>${tripType} • ${fareType}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Branded Fare Features -->
+                                        ${features.length > 0 ? `
+                                                <div class="mt-4 pt-3 border-t border-dashed border-gray-200">
+                                                    <div class="flex flex-wrap gap-3">
+                                                        ${features.map(f => `
+                                                            <div class="flex items-center gap-1.5 bg-blue-50 px-3 py-1.5 rounded-full text-xs">
+                                                                <span>${f.icon}</span>
+                                                                <span class="font-medium text-gray-700">${f.label}:</span>
+                                                                <span class="text-gray-600">${f.text}</span>
+                                                            </div>
+                                                        `).join('')}
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                    </div>
+
+                                    <!-- 🔥 FOOTER: PRICE & ACTION WITH NEW PRICING -->
+                                    <div class="bg-gray-50 px-6 py-3 flex flex-wrap items-center justify-between border-t border-gray-100 gap-2">
+                                        <div class="flex flex-wrap items-center gap-4">
+                                            <div>
+                                                <div class="text-xs text-gray-500">${hasPricing ? '💎 Net Fare' : 'Total'}</div>
+                                                <div class="text-2xl font-bold text-gray-800">$${netFare.toFixed(2)}</div>
+                                                ${hasPricing ? `
+                                                    <div class="text-xs text-gray-400">Tax included</div>
+                                                ` : ''}
+                                            </div>
+                                            ${hasPricing ? `
+                                                <div class="h-8 w-px bg-gray-300"></div>
+                                                <div>
+                                                    <div class="text-xs text-gray-500">💰 Gross Fare</div>
+                                                    <div class="text-xl font-bold text-green-600">$${grossFare.toFixed(2)}</div>
+                                                    <div class="text-xs text-green-500 flex items-center gap-1">
+                                                        <span>✨ ${((newDiscount / grossFare) * 100).toFixed(1)}% off</span>
+                                                    </div>
+                                                </div>
+                                                <div class="h-8 w-px bg-gray-300"></div>
+                                                <div>
+                                                    <div class="text-xs text-gray-500">💵 Discount</div>
+                                                    <div class="text-lg font-bold text-red-500">-$${newDiscount.toFixed(2)}</div>
+                                                    <div class="text-xs text-gray-400">${newDiscount > 0 ? 'Commission discount' : 'No discount'}</div>
+                                                </div>
+                                            ` : `
+                                                ${apiDiscount > 0 ? `
+                                                    <div class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
+                                                        💰 Saved $${apiDiscount.toFixed(2)}
+                                                    </div>
+                                                ` : ''}
+                                            `}
+                                            ${fees > 0 ? `
+                                                <div class="text-xs text-gray-400">+ $${fees.toFixed(2)} fees</div>
+                                            ` : ''}
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-xs text-gray-400">Tax: $${totalTax.toFixed(2)}</span>
+                                            <button class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105">
+                                                ✈️ Select
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="text-xs text-gray-400">Tax: $${totalTax.toFixed(2)}</span>
-                                    <button class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-xl text-sm font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105">
-                                        ✈️ Select
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                            `;
             });
 
             html += `</div>`;
@@ -1236,10 +1271,10 @@
             } else {
                 $('loadingState').classList.add('hidden');
                 $('flightResults').innerHTML = `
-                        <div class="bg-blue-50 border border-blue-200 text-blue-700 p-6 rounded-xl text-center">
-                            <p class="text-lg font-medium">🔍 Please fill in all fields and click Search</p>
-                        </div>
-                    `;
+                                <div class="bg-blue-50 border border-blue-200 text-blue-700 p-6 rounded-xl text-center">
+                                    <p class="text-lg font-medium">🔍 Please fill in all fields and click Search</p>
+                                </div>
+                            `;
             }
         };
 
@@ -1257,17 +1292,20 @@
     .scrollbar-thin::-webkit-scrollbar {
         width: 4px;
     }
+
     .scrollbar-thin::-webkit-scrollbar-track {
         background: #f1f1f1;
         border-radius: 10px;
     }
+
     .scrollbar-thin::-webkit-scrollbar-thumb {
         background: #c1c1c1;
         border-radius: 10px;
     }
-    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
 
     /* Filter section animation */
     .filter-section > div:not(.filter-section) {
@@ -1279,6 +1317,7 @@
             opacity: 0;
             transform: translateY(-10px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -1295,6 +1334,7 @@
     .filter-section button:hover svg {
         transform: rotate(180deg);
     }
+
     .filter-section button svg {
         transition: transform 0.3s ease;
     }
@@ -1304,6 +1344,7 @@
         opacity: 0.5;
         transition: opacity 0.3s ease;
     }
+
     #flightResults.pointer-events-none {
         pointer-events: none;
     }

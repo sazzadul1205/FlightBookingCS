@@ -7,12 +7,13 @@ public class FlightResultsViewModel
     public int TotalCount { get; set; }
     public string? IGXKey { get; set; }
 }
+
 public class FlightResultItem
 {
-    // ===== IDENTIFIER =====
+    //  IDENTIFIER 
     public string Id { get; set; } = string.Empty;
 
-    // ===== FLIGHT LEVEL PROPERTIES =====
+    //  FLIGHT LEVEL PROPERTIES 
     public bool IsRefundable { get; set; }
     public bool IsBookable { get; set; }
     public string? TripType { get; set; }
@@ -20,7 +21,11 @@ public class FlightResultItem
     public string? PlatingCarrierName { get; set; }
     public string? FareType { get; set; }
 
-    // ===== ARRAYS =====
+    //  NEW PRICING PROPERTIES 
+    public decimal NewBaseFare { get; set; }
+    public decimal NewDiscount { get; set; }
+
+    //  ARRAYS 
     public List<FlightSegmentInfo> Onwards { get; set; } = new();
     public List<TotalTravelTimeInfo> TotalTravelTimes { get; set; } = new();
     public List<FareBreakdownInfo> FareBreakdown { get; set; } = new();

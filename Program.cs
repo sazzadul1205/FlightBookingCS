@@ -84,6 +84,7 @@ builder.Services.AddScoped<IGetCitiesService, GetCitiesService>();
 builder.Services.AddScoped<IFlightSearchService, FlightSearchService>();
 builder.Services.AddScoped<IFilterService, FilterService>();
 builder.Services.AddScoped<ICacheService, CacheService>();
+builder.Services.AddScoped<IPricingService, PricingService>();
 
 var app = builder.Build();
 

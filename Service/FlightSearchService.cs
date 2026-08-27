@@ -2,6 +2,7 @@
 using FlightBookingCS.ViewModel;
 using FlightBookingCS.ViewModel.ApiModels;
 using System.IO.Compression;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 
@@ -12,15 +13,22 @@ public class FlightSearchService : IFlightSearchService
     private readonly HttpClient _httpClient;
     private readonly ILogger<FlightSearchService> _logger;
     private readonly ICacheService _cacheService;
+    private readonly IPricingService _pricingService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
 
     public FlightSearchService(
         HttpClient httpClient,
         ICacheService cacheService,
+        IPricingService pricingService,
+        IHttpContextAccessor httpContextAccessor,
         ILogger<FlightSearchService> logger)
     {
         _httpClient = httpClient;
-        _logger = logger;
         _cacheService = cacheService;
+        _pricingService = pricingService;
+        _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
     }
 
     public async Task<FlightResultsViewModel> SearchFlightsAsync(FlightSearchRequest request)
@@ -98,8 +106,10 @@ public class FlightSearchService : IFlightSearchService
                 return CreateErrorViewModel(apiResponse.Message ?? "API returned failure");
             }
 
+            // Extract IGXKey
             string? igxKey = apiResponse.Payload?.FirstOrDefault()?.IGXKey;
 
+            // If IGX Key not null
             if (!string.IsNullOrEmpty(igxKey))
             {
                 await _cacheService.StoreAsyc(igxKey, apiResponse, request);
@@ -108,8 +118,20 @@ public class FlightSearchService : IFlightSearchService
 
             // Map to ViewModel and include the IGXKey
             var viewModel = MapToViewModel(apiResponse);
+            viewModel.IGXKey = igxKey;
 
-            viewModel.IGXKey = igxKey; 
+            var userId =  _httpContextAccessor.HttpContext?.User
+                .FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                _logger.LogInformation("User logged in - Applying pricing rules for user: {UserId}", userId);
+                viewModel = await _pricingService.ApplyPricingToFlightsAsync(viewModel, userId);
+            }
+            else
+            {
+                _logger.LogInformation("User not logged in - No pricing rules applied");
+            }
 
             // Map to ViewModel
             return viewModel;

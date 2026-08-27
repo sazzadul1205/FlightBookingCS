@@ -247,7 +247,7 @@ public class FilterService : IFilterService
         return result.ToList();
     }
 
-    // Helper methods
+    // --- Helper methods ---
 
     // Time Range
     private List<TimeRange> GetTimeRanges()
