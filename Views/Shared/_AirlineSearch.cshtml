@@ -1,0 +1,384 @@
+@model string
+
+@{
+    // Store the ViewBag.Airlines data in a JavaScript variable
+    var airlinesJson = Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.Airlines ?? new List<object>());
+}
+
+<div class="airline-search-wrapper">
+    <label asp-for="@Model" class="block text-sm font-medium text-gray-700">Airline</label>
+
+    <!-- Search Input -->
+    <div class="relative mt-1">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+        </div>
+        <input type="text" id="airlineSearchInput"
+               class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+               placeholder="Search airline by code or name..." autocomplete="off" />
+        <button type="button" id="clearSearchBtn"
+                class="absolute inset-y-0 right-0 hidden items-center pr-3 text-gray-400 hover:text-gray-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Dropdown List -->
+    <div id="airlineDropdown" class="relative mt-1" style="display: none;">
+        <div class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <div id="airlineListContainer">
+                <!-- Airlines will be populated here -->
+            </div>
+            <div id="noResultsMessage" class="hidden px-4 py-3 text-sm text-gray-500 text-center">
+                No airlines found matching your search
+            </div>
+        </div>
+    </div>
+
+    <!-- Selected Airline Display -->
+    <div id="selectedAirlineDisplay" class="mt-2 hidden">
+        <div class="flex items-center justify-between p-2 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span id="selectedAirlineText" class="text-sm font-medium text-gray-700"></span>
+            </div>
+            <button type="button" id="clearSelectionBtn" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Hidden input for form submission -->
+    <input type="hidden" id="selectedAirlineCode" name="@Model" value="" />
+
+    <!-- Validation Message - Fixed this part -->
+    <span id="airlineValidationMessage" class="text-sm text-red-600 field-validation-valid" data-valmsg-for="@Model"
+          data-valmsg-replace="true"></span>
+
+    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey(Model))
+    {
+        var errors = ViewData.ModelState[Model].Errors;
+        if (errors.Any())
+        {
+            <span class="text-sm text-red-600">@string.Join(" ", errors.Select(e => e.ErrorMessage))</span>
+        }
+    }
+</div>
+
+<style>
+    .airline-item {
+        cursor: pointer;
+        transition: background-color 0.15s;
+        padding: 8px 12px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .airline-item:last-child {
+        border-bottom: none;
+    }
+
+    .airline-item:hover {
+        background-color: #f3f4f6;
+    }
+
+    .airline-item.selected {
+        background-color: #eff6ff;
+    }
+
+    .airline-item .airline-code {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .airline-item .airline-name {
+        color: #6b7280;
+        margin-left: 8px;
+    }
+
+    .airline-item .airline-badge {
+        display: inline-block;
+        padding: 1px 8px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #2563eb;
+        background-color: #dbeafe;
+        border-radius: 12px;
+        margin-left: 8px;
+    }
+
+    .highlight {
+        background-color: #fef08a;
+        font-weight: 600;
+    }
+
+    .airline-search-wrapper {
+        position: relative;
+    }
+
+    #airlineDropdown {
+        position: relative;
+        z-index: 50;
+    }
+
+    .field-validation-error {
+        color: #dc2626;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize the airline search
+        const airlinesData = @Html.Raw(airlinesJson);
+        initAirlineSearch(airlinesData);
+    });
+
+    function initAirlineSearch(airlines) {
+        const searchInput = document.getElementById('airlineSearchInput');
+        const dropdown = document.getElementById('airlineDropdown');
+        const listContainer = document.getElementById('airlineListContainer');
+        const noResults = document.getElementById('noResultsMessage');
+        const selectedDisplay = document.getElementById('selectedAirlineDisplay');
+        const selectedText = document.getElementById('selectedAirlineText');
+        const selectedCodeInput = document.getElementById('selectedAirlineCode');
+        const clearBtn = document.getElementById('clearSearchBtn');
+        const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+        const validationMessage = document.getElementById('airlineValidationMessage');
+
+        // Render all airlines initially
+        renderAirlines(airlines);
+
+        // Search input event
+        searchInput.addEventListener('input', function () {
+            const searchTerm = this.value.trim();
+
+            if (searchTerm.length > 0) {
+                clearBtn.classList.remove('hidden');
+                clearBtn.classList.add('flex');
+
+                const filtered = filterAirlines(airlines, searchTerm);
+                renderAirlines(filtered);
+
+                if (filtered.length === 0) {
+                    noResults.classList.remove('hidden');
+                } else {
+                    noResults.classList.add('hidden');
+                }
+
+                dropdown.style.display = 'block';
+            } else {
+                clearBtn.classList.add('hidden');
+                clearBtn.classList.remove('flex');
+                renderAirlines(airlines);
+                noResults.classList.add('hidden');
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Focus input to show dropdown
+        searchInput.addEventListener('focus', function () {
+            if (this.value.trim().length > 0) {
+                dropdown.style.display = 'block';
+            } else {
+                // Show all airlines when focusing with empty search
+                renderAirlines(airlines);
+                noResults.classList.add('hidden');
+                dropdown.style.display = 'block';
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const wrapper = document.querySelector('.airline-search-wrapper');
+            if (!wrapper.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Clear search button
+        clearBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            searchInput.focus();
+            this.classList.add('hidden');
+            this.classList.remove('flex');
+            renderAirlines(airlines);
+            noResults.classList.add('hidden');
+            dropdown.style.display = 'block';
+        });
+
+        // Clear selection button
+        clearSelectionBtn.addEventListener('click', function () {
+            clearSelection();
+        });
+
+        // Keyboard navigation
+        let selectedIndex = -1;
+
+        searchInput.addEventListener('keydown', function (e) {
+            const items = listContainer.querySelectorAll('.airline-item');
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateSelectedItem(items, selectedIndex);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, 0);
+                updateSelectedItem(items, selectedIndex);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedIndex >= 0 && items.length > 0) {
+                    items[selectedIndex].click();
+                } else if (items.length === 1) {
+                    items[0].click();
+                }
+            } else if (e.key === 'Escape') {
+                dropdown.style.display = 'none';
+                searchInput.blur();
+            }
+        });
+
+        function updateSelectedItem(items, index) {
+            items.forEach((item, i) => {
+                item.classList.toggle('selected', i === index);
+                if (i === index) {
+                    item.scrollIntoView({ block: 'nearest' });
+                }
+            });
+        }
+
+        function filterAirlines(airlines, searchTerm) {
+            const term = searchTerm.toLowerCase();
+            return airlines.filter(airline => {
+                const code = airline.Code?.toLowerCase() || '';
+                const name = airline.AriLineName?.toLowerCase() || '';
+                return code.includes(term) || name.includes(term);
+            });
+        }
+
+        function renderAirlines(airlinesToRender) {
+            if (airlinesToRender.length === 0) {
+                listContainer.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            const searchTerm = searchInput.value.trim().toLowerCase();
+
+            airlinesToRender.forEach((airline, index) => {
+                const code = airline.Code || '';
+                const name = airline.AriLineName || '';
+
+                // Highlight matching text
+                let displayCode = escapeHtml(code);
+                let displayName = escapeHtml(name);
+
+                if (searchTerm) {
+                    displayCode = highlightText(displayCode, searchTerm);
+                    displayName = highlightText(displayName, searchTerm);
+                }
+
+                html += `
+                    <div class="airline-item" data-code="${escapeHtml(code)}" data-name="${escapeHtml(name)}" data-index="${index}">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="airline-code">${displayCode}</span>
+                                <span class="airline-name">${displayName}</span>
+                            </div>
+                            <span class="airline-badge">${escapeHtml(code)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+
+            // Add click events to items
+            listContainer.querySelectorAll('.airline-item').forEach(item => {
+                item.addEventListener('click', function () {
+                    const code = this.dataset.code;
+                    const name = this.dataset.name;
+                    selectAirline(code, name);
+                });
+            });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function highlightText(text, searchTerm) {
+            if (!text || !searchTerm) return text;
+            const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        function selectAirline(code, name) {
+            // Set hidden input value
+            selectedCodeInput.value = code;
+
+            // Update display
+            selectedText.textContent = `${code} - ${name}`;
+            selectedDisplay.classList.remove('hidden');
+
+            // Update search input
+            searchInput.value = `${code} - ${name}`;
+
+            // Close dropdown
+            dropdown.style.display = 'none';
+
+            // Clear button
+            clearBtn.classList.add('hidden');
+            clearBtn.classList.remove('flex');
+
+            // Clear validation message
+            if (validationMessage) {
+                validationMessage.textContent = '';
+                validationMessage.className = 'text-sm text-red-600 field-validation-valid';
+            }
+
+            // Trigger change event for any listeners
+            const event = new Event('change', { bubbles: true });
+            selectedCodeInput.dispatchEvent(event);
+
+            // Log selection
+            console.log('Selected Airline:', { code, name });
+        }
+
+        function clearSelection() {
+            selectedCodeInput.value = '';
+            selectedDisplay.classList.add('hidden');
+            searchInput.value = '';
+            searchInput.focus();
+            dropdown.style.display = 'block';
+            renderAirlines(airlines);
+            noResults.classList.add('hidden');
+
+            // Trigger change event
+            const event = new Event('change', { bubbles: true });
+            selectedCodeInput.dispatchEvent(event);
+        }
+
+        // If there's a pre-selected value (for Edit view)
+        const preselectedCode = '@Model';
+        if (preselectedCode && airlines.length > 0) {
+            const preselected = airlines.find(a => a.Code === preselectedCode);
+            if (preselected) {
+                // Use setTimeout to ensure DOM is ready
+                setTimeout(function () {
+                    selectAirline(preselected.Code, preselected.AriLineName);
+                }, 100);
+            }
+        }
+    }
+</script>
