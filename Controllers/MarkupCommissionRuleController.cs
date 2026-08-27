@@ -87,7 +87,7 @@ public class MarkupCommissionRuleController : Controller
     }
 
     [HttpPost]
-    //[ValidateAntiForgeryToken]  // Ask Instructor (Tanim Bhai) 
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MarkupCommissionRuleCreateViewModel model)
     {
         _logger.LogInformation("Frontend Hit Create");
@@ -168,6 +168,7 @@ public class MarkupCommissionRuleController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(MarkupCommissionRuleEditViewModel model)
     {
         if (ModelState.IsValid)

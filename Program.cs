@@ -3,6 +3,8 @@ using FlightBookingCS.Data;
 using FlightBookingCS.Filter;
 using FlightBookingCS.Service;
 using FlightBookingCS.Service.Interface;
+using Microsoft.AspNetCore.HttpOverrides;
+
 // External
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -86,6 +88,17 @@ builder.Services.AddScoped<IFilterService, FilterService>();
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 
+// Add this if you're behind IIS/Nginx/a load balancer that terminates HTTPS
+
+
+// Register antiforgery with explicit cookie settings
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.Name = "X-CSRF-TOKEN";
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; 
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -94,7 +107,10 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 app.UseHttpsRedirection();
 app.UseRouting();
 
