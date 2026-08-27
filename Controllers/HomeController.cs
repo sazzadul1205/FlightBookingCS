@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using FlightBookingCS.Models;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace FlightBookingCS.Controllers;
 
@@ -9,7 +8,7 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-        return View();
+        return RedirectToAction("Index", "FlightSearch");
     }
 
     public IActionResult Privacy()

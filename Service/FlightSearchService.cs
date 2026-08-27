@@ -2,7 +2,6 @@
 using FlightBookingCS.ViewModel;
 using FlightBookingCS.ViewModel.ApiModels;
 using System.IO.Compression;
-using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 

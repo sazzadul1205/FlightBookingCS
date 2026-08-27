@@ -2,7 +2,6 @@ using FlightBookingCS.Service.Interface;
 using FlightBookingCS.ViewModel;
 using FlightBookingCS.ViewModel.MarkupCommissionRule;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -93,20 +92,18 @@ public class MarkupCommissionRuleController : Controller
     {
         _logger.LogInformation("Frontend Hit Create");
 
-            if (model == null)
+        if (model == null)
         {
             _logger.LogError("Model has returned Null");
             return BadRequest("Model has returned Null");
-
         }
-        
+
         if (ModelState.IsValid)
         {
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var result = await _markupCommissionService.CreateAsync(model, userId!);
-
 
                 if (result.Success)
                 {
@@ -116,18 +113,20 @@ public class MarkupCommissionRuleController : Controller
                 else
                 {
                     ViewBag.ErrorMessage = result.ErrorMessage;
+                    await LoadAirlinesToViewBag();
                     return View(model);
                 }
             }
             catch (Exception)
             {
                 ViewBag.ErrorMessage = "An error occurred while creating the rule.";
+                await LoadAirlinesToViewBag();
                 return View(model);
             }
         }
-        
+
         ViewBag.ErrorMessage = "Please fix the validation errors.";
-        
+        await LoadAirlinesToViewBag();
         return View(model);
     }
 
@@ -169,7 +168,6 @@ public class MarkupCommissionRuleController : Controller
     }
 
     [HttpPost]
-    //[ValidateAntiForgeryToken]  // Ask Instructor (Tanim Bhai) 
     public async Task<IActionResult> Edit(MarkupCommissionRuleEditViewModel model)
     {
         if (ModelState.IsValid)
@@ -187,16 +185,19 @@ public class MarkupCommissionRuleController : Controller
                 else
                 {
                     ViewBag.ErrorMessage = result.ErrorMessage;
+                    await LoadAirlinesToViewBag();
                     return View(model);
                 }
             }
             catch (Exception)
             {
                 ViewBag.ErrorMessage = "An error occurred while updating the rule.";
+                await LoadAirlinesToViewBag();
                 return View(model);
             }
         }
         ViewBag.ErrorMessage = "Please fix the validation errors.";
+        await LoadAirlinesToViewBag();
         return View(model);
     }
 
@@ -223,7 +224,31 @@ public class MarkupCommissionRuleController : Controller
         }
     }
 
-    [HttpPost, ActionName("ChangeStatus")]
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeleteConfirmed(int Id)
+    {
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _markupCommissionService.DeleteAsync(Id, userId!);
+
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = "Rule deleted successfully!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage;
+            }
+        }
+        catch (Exception)
+        {
+            TempData["ErrorMessage"] = "An error occurred while deleting the rule.";
+        }
+        return RedirectToAction("Index");
+    }
+
+    [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeStatus(int Id)
     {
@@ -248,32 +273,7 @@ public class MarkupCommissionRuleController : Controller
         return RedirectToAction("Index");
     }
 
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int Id)
-    {
-        try
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _markupCommissionService.DeleteAsync(Id, userId!);
-
-            if (result.Success)
-            {
-                TempData["SuccessMessage"] = "Rule deleted successfully!";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = result.ErrorMessage;
-            }
-        }
-        catch (Exception)
-        {
-            TempData["ErrorMessage"] = "An error occurred while deleting the rule.";
-        }
-        return RedirectToAction("Index");
-    }
-
-    [HttpPost, ActionName("Restore")]
+    [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Restore(int Id)
     {
@@ -298,7 +298,7 @@ public class MarkupCommissionRuleController : Controller
         return RedirectToAction("DeletedIndex");
     }
 
-    [HttpPost, ActionName("ForceDelete")]
+    [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ForceDelete(int Id)
     {
@@ -325,16 +325,18 @@ public class MarkupCommissionRuleController : Controller
 
     private async Task LoadAirlinesToViewBag()
     {
-        try {
+        try
+        {
             var result = await _airlineService.GetAirlineAsync();
             ViewBag.Airlines = result.Payload ?? new List<AirlinePayload>();
             ViewBag.ApiSuccess = result?.Success ?? false;
             ViewBag.ApiMessage = result?.Message ?? "Unable to fetch airlines";
-        } catch(Exception ex) {
+        }
+        catch (Exception ex)
+        {
             ViewBag.Airlines = new List<AirlinePayload>();
             ViewBag.ApiSuccess = false;
             ViewBag.ApiMessage = $"Error loading airlines: {ex.Message}";
         }
     }
-
 }

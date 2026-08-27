@@ -23,7 +23,16 @@
             <dl class="divide-y divide-gray-200">
                 <div class="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt class="text-sm font-medium text-gray-500">Airline Code</dt>
-                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">@Model.AirlineCode</dd>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        @if (string.IsNullOrEmpty(Model.AirlineCode))
+                        {
+                            <span class="text-gray-500">All Airlines</span>
+                        }
+                        else
+                        {
+                            @Model.AirlineCode
+                        }
+                    </dd>
                 </div>
                 <div class="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt class="text-sm font-medium text-gray-500">Markup Type</dt>
@@ -33,7 +42,13 @@
                 </div>
                 <div class="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt class="text-sm font-medium text-gray-500">Markup Value</dt>
-                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">@Model.MarkupValue</dd>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        @Model.MarkupValue
+                        @if (Model.MarkupType == "Percentage")
+                        {
+                            <span class="text-sm text-gray-500">%</span>
+                        }
+                    </dd>
                 </div>
                 <div class="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt class="text-sm font-medium text-gray-500">Commission Type</dt>
@@ -43,7 +58,13 @@
                 </div>
                 <div class="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt class="text-sm font-medium text-gray-500">Commission Value</dt>
-                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">@Model.CommissionValue</dd>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        @Model.CommissionValue
+                        @if (Model.CommissionType == "Percentage")
+                        {
+                            <span class="text-sm text-gray-500">%</span>
+                        }
+                    </dd>
                 </div>
                 <div class="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                     <dt class="text-sm font-medium text-gray-500">Status</dt>
@@ -58,6 +79,18 @@
                         }
                     </dd>
                 </div>
+                <div class="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-sm font-medium text-gray-500">Created At</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        @Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")
+                    </dd>
+                </div>
+                <div class="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
+                    <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        @Model.UpdatedAt.ToString("MMM dd, yyyy HH:mm")
+                    </dd>
+                </div>
             </dl>
         </div>
 
@@ -68,7 +101,7 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    Delete
+                    Confirm Delete
                 </button>
             </form>
             <a asp-action="Index" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
