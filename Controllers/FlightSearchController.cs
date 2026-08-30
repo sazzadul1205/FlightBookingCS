@@ -3,6 +3,7 @@ using FlightBookingCS.Service.Interface;
 using FlightBookingCS.ViewModel;
 using FlightBookingCS.ViewModel.ApiModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FlightBookingCS.Controllers
 {
@@ -11,17 +12,20 @@ namespace FlightBookingCS.Controllers
         private readonly IGetCitiesService _citiesService;
         private readonly IFlightSearchService _flightSearchService;
         private readonly IFilterService _filterService;
+        private readonly IPricingService _pricingService;
         private readonly ILogger<FlightSearchController> _logger;
 
         public FlightSearchController(
             ILogger<FlightSearchController> logger,
             IFlightSearchService flightSearchService,
             IFilterService filterService,
+            IPricingService pricingService,
             IGetCitiesService citiesService)
         {
             _citiesService = citiesService;
             _flightSearchService = flightSearchService;
             _filterService = filterService;
+            _pricingService = pricingService;
             _logger = logger;
         }
 
@@ -131,16 +135,28 @@ namespace FlightBookingCS.Controllers
                     });
                 }
 
-                var filterOptions = _filterService.GenerateFilterOptions(result.Flights);
+                // Apply pricing rules for logged-in users
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var viewModel = new FlightResultsViewModel
+                {
+                    Flights = result.Flights,
+                    HasMore = result.HasMore,
+                    TotalCount = result.TotalCount,
+                    IGXKey = result.IGXKey
+                };
+                
+                viewModel = await _pricingService.ApplyPricingToFlightsAsync(viewModel, userId);
+
+                var filterOptions = _filterService.GenerateFilterOptions(viewModel.Flights);
 
                 return Ok(new
                 {
                     success = true,
                     message = "Flights Found",
-                    flights = result.Flights,
-                    hasMore = result.HasMore,
-                    totalCount = result.TotalCount,
-                    igxKey = result?.IGXKey,
+                    flights = viewModel.Flights,
+                    hasMore = viewModel.HasMore,
+                    totalCount = viewModel.TotalCount,
+                    igxKey = viewModel.IGXKey,
                     filterOptions,
                 });
 
@@ -172,7 +188,19 @@ namespace FlightBookingCS.Controllers
                 }
 
                 var flights = MapPayloadToFlightResultItems(cachedResponse.Payload);
-                var filteredFlights = _filterService.ApplyFilters(flights, filterRequest);
+                
+                // Apply pricing rules for logged-in users
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var viewModel = new FlightResultsViewModel
+                {
+                    Flights = flights,
+                    HasMore = false,
+                    TotalCount = flights.Count,
+                    IGXKey = filterRequest.IGXKey
+                };
+                
+                viewModel = _pricingService.ApplyPricingToFlightsAsync(viewModel, userId).Result;
+                var filteredFlights = _filterService.ApplyFilters(viewModel.Flights, filterRequest);
 
                 var filterOptions = _filterService.GenerateFilterOptions(filteredFlights);
 
