@@ -10,17 +10,34 @@ namespace FlightBookingCS.Service;
 public class MarkupCommissionRuleService : IMarkupCommissionRuleService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IAirlineService _airlineService;
 
 
-    public MarkupCommissionRuleService(ApplicationDbContext context)
+    public MarkupCommissionRuleService(ApplicationDbContext context, IAirlineService airlineService)
     {
         _context = context;
+        _airlineService = airlineService;
     }
 
     public async Task<List<MarkupCommissionRuleIndexViewModel>> GetAllByUserIdAsync(string userId)
     {
         var markups = await _context.MarkupCommissionRule.Where(x => x.UserId == userId &&
         x.DeletedAt == null).ToListAsync();
+
+        // Fetch all airlines once
+        var airlineResponse = await _airlineService.GetAirlineAsync();
+        var airlineDict = new Dictionary<string, string>();
+        
+        if (airlineResponse?.Payload != null)
+        {
+            foreach (var airline in airlineResponse.Payload)
+            {
+                if (!string.IsNullOrEmpty(airline.Code))
+                {
+                    airlineDict[airline.Code] = airline.AriLineName;
+                }
+            }
+        }
 
         var result = new List<MarkupCommissionRuleIndexViewModel>();
 
@@ -31,6 +48,9 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
                 Id = markup.Id,
                 UserId = markup.UserId,
                 AirlineCode = markup.AirlineCode,
+                AirlineName = !string.IsNullOrEmpty(markup.AirlineCode) && airlineDict.ContainsKey(markup.AirlineCode) 
+                    ? airlineDict[markup.AirlineCode] 
+                    : markup.AirlineCode,
                 MarkupType = markup.MarkupType,
                 MarkupValue = markup.MarkupValue,
                 CommissionType = markup.CommissionType,
@@ -49,6 +69,21 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
         var markups = await _context.MarkupCommissionRule.Where(x => x.UserId == userId &&
         x.DeletedAt != null).ToListAsync();
 
+        // Fetch all airlines once
+        var airlineResponse = await _airlineService.GetAirlineAsync();
+        var airlineDict = new Dictionary<string, string>();
+        
+        if (airlineResponse?.Payload != null)
+        {
+            foreach (var airline in airlineResponse.Payload)
+            {
+                if (!string.IsNullOrEmpty(airline.Code))
+                {
+                    airlineDict[airline.Code] = airline.AriLineName;
+                }
+            }
+        }
+
         var result = new List<MarkupCommissionRuleIndexViewModel>();
 
         foreach (var markup in markups)
@@ -58,6 +93,9 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
                 Id = markup.Id,
                 UserId = markup.UserId,
                 AirlineCode = markup.AirlineCode,
+                AirlineName = !string.IsNullOrEmpty(markup.AirlineCode) && airlineDict.ContainsKey(markup.AirlineCode) 
+                    ? airlineDict[markup.AirlineCode] 
+                    : markup.AirlineCode,
                 MarkupType = markup.MarkupType,
                 MarkupValue = markup.MarkupValue,
                 CommissionType = markup.CommissionType,
@@ -82,11 +120,26 @@ public class MarkupCommissionRuleService : IMarkupCommissionRuleService
             return null;
         }
 
+        // Fetch airline name
+        var airlineResponse = await _airlineService.GetAirlineAsync();
+        string? airlineName = null;
+        
+        if (!string.IsNullOrEmpty(markup.AirlineCode) && airlineResponse?.Payload != null)
+        {
+            var airline = airlineResponse.Payload.FirstOrDefault(a => a.Code == markup.AirlineCode);
+            airlineName = airline?.AriLineName ?? markup.AirlineCode;
+        }
+        else
+        {
+            airlineName = markup.AirlineCode;
+        }
+
         return new MarkupCommissionRuleIndexViewModel
         {
             Id = markup.Id,
             UserId = markup.UserId,
             AirlineCode = markup.AirlineCode,
+            AirlineName = airlineName,
             MarkupType = markup.MarkupType,
             MarkupValue = markup.MarkupValue,
             CommissionType = markup.CommissionType,
