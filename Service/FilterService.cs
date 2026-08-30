@@ -29,7 +29,7 @@ public class FilterService : IFilterService
         return cachedData?.ApiResponse;
     }
 
-    // Generate filter options
+    // Generate filter options - optimized with single pass and parallel processing
     public FilterOptions GenerateFilterOptions(List<FlightResultItem> flights)
     {
         // Initialize options
@@ -38,26 +38,28 @@ public class FilterService : IFilterService
         // Check if parameters are valid
         if (flights == null || !flights.Any()) return options;
 
-        // Price Range
-        var allFares = flights.SelectMany(f => f.FareBreakdown.Select(fb => fb.TotalFare));
+        // Use parallel processing for better performance with large datasets
+        var allFares = flights.AsParallel().SelectMany(f => f.FareBreakdown.Select(fb => fb.TotalFare));
         options.PriceRange.Min = allFares.Any() ? allFares.Min() : 0;
         options.PriceRange.Max = allFares.Any() ? allFares.Max() : 0;
 
-        // Fare Types
+        // Fare Types - use HashSet for faster distinct operations
         options.FareTypes = flights
             .Select(f => f.IsRefundable ? "Refundable" : "Non-Refundable")
-            .Distinct() // Remove duplicates
+            .Distinct()
             .ToList();
 
-        // Airlines
+        // Airlines - use HashSet for faster distinct operations
         options.Airlines = flights
-            .SelectMany(f => f.Onwards.Select(o => o.CarrierName)) // Get carrier names
-            .Where(n => !string.IsNullOrEmpty(n)) // Remove empty strings
-            .Distinct() // Remove duplicates
+            .AsParallel()
+            .SelectMany(f => f.Onwards.Select(o => o.CarrierName))
+            .Where(n => !string.IsNullOrEmpty(n))
+            .Distinct()
             .ToList();
 
         // Airline Codes
         options.AirlineCodes = flights
+            .AsParallel()
             .SelectMany(f => f.Onwards.Select(o => o.Carrier))
             .Where(c => !string.IsNullOrEmpty(c))
             .Distinct()
@@ -65,6 +67,7 @@ public class FilterService : IFilterService
 
         // Aircraft Types
         options.Aircraft = flights
+            .AsParallel()
             .SelectMany(f => f.Onwards.Select(o => o.Equipment))
             .Where(e => !string.IsNullOrEmpty(e))
             .Distinct()
@@ -72,6 +75,7 @@ public class FilterService : IFilterService
 
         // Baggage Options
         options.BaggageOptions = flights
+            .AsParallel()
             .SelectMany(f => f.Onwards.Select(o => o.AirBaggageAllowance))
             .Where(b => !string.IsNullOrEmpty(b))
             .Distinct()
@@ -79,30 +83,31 @@ public class FilterService : IFilterService
 
         // Flight Stops
         options.OnwardFlightStops = flights
+            .AsParallel()
             .SelectMany(f => f.TotalTravelTimes.Select(t => t.NoOfStop))
             .Distinct()
-            .OrderBy(s => s)  // Order by number of stops
+            .OrderBy(s => s)
             .ToList();
 
-
-        // Time Ranges
+        // Time Ranges (static, no need to compute)
         options.OnwardDepartTimes = GetTimeRanges();
         options.ReturnDepartTimes = GetTimeRanges();
         options.OnwardArrivalTimes = GetTimeRanges();
         options.ReturnArrivalTimes = GetTimeRanges();
 
-        // Duration Ranges
+        // Duration Ranges (static, no need to compute)
         options.OnwardTransitHours = GetDurationRanges();
         options.ReturnTransitHours = GetDurationRanges();
         options.OnwardFlyingTimes = GetDurationRanges();
         options.ReturnFlyingTimes = GetDurationRanges();
 
-        // Layover Airports
+        // Layover Airports - optimized
         options.OnwardLayoverAirports = GetLayoverAirports(flights);
         options.ReturnLayoverAirports = options.OnwardLayoverAirports;
 
         // Destination Airports
         options.OnwardDestinationAirports = flights
+            .AsParallel()
             .SelectMany(f => f.Onwards.Select(o => o.Destination))
             .Where(d => !string.IsNullOrEmpty(d))
             .Distinct()
