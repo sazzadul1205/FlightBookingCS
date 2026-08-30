@@ -1,4 +1,10 @@
 .vs/
+
+# .NET build artifacts
+bin/
+obj/
+*.user
+
 # Compiled and build artifacts
 *.pyc
 __pycache__/
