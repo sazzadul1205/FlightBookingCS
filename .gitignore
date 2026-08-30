@@ -1,65 +1,67 @@
-```gitignore
-# Build artifacts
-*.dll
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
 *.exe
-*.pdb
-*.nupkg
-*.snupkg
-bin/
-obj/
-out/
+*.dll
+*.so
+*.class
+*.out
 
 # Dependencies
-packages/
 node_modules/
-.nuget/
-.nyc_output/
-coverage/
-
-# Logs and temp files
-*.log
-*.tmp
-*.temp
-*.cache
-
-# Environment
+venv/
+.venv/
 .env
 .env.local
 *.env.*
 
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
 # Editors
-.vs/
-.vshistory/
 .vscode/
 .idea/
-*.userprefs
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
+*.swp
+*.swo
 
-# OS generated files
+# OS specific
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-desktop.ini
 
-# Testing
-TestResults/
+# Build and distribution
+dist/
+build/
+target/
 coverage/
-*.coverage
-*.log
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+.gradle/
 
-# Azure
-azureadmin/
-PublishProfiles/
-
-# ReSharper
-_ReSharper*/
-*.[Rr]e[Ss]harper
-*.DotSettings.user
-```
+# Archives
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst

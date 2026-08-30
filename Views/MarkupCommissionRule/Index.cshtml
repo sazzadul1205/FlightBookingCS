@@ -45,6 +45,7 @@
                             <tr>
                                 <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">#</th>
                                 <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Airline Code</th>
+                                <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Airline Name</th>
                                 <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Markup Type</th>
                                 <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Markup Value</th>
                                 <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Commission Type</th>
@@ -60,6 +61,7 @@
                                 <tr class="transition-colors duration-200 hover:bg-gray-50">
                                     <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">@(item.index + 1)</td>
                                     <td class="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">@item.value.AirlineCode</td>
+                                    <td class="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">@item.value.AirlineName</td>
                                     <td class="px-4 py-3 text-sm whitespace-nowrap">
                                         <span class="inline-flex px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">@item.value.MarkupType</span>
                                     </td>
