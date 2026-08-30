@@ -37,9 +37,29 @@ public class FlightSearchService : IFlightSearchService
             var apiUrl = "https://uthaotrip.com/api/air/UnauthorizeSearchAir";
             _logger.LogInformation("Searching flights from: {ApiUrl}", apiUrl);
 
+            // Try to get from cache first if available
+            var cachedData = await _cacheService.GetAsync(request.GenerateCacheKey());
+            if (cachedData?.ApiResponse != null && cachedData.ApiResponse.Success)
+            {
+                _logger.LogInformation("Cache hit for request");
+                var viewModel = MapToViewModel(cachedData.ApiResponse);
+                viewModel.IGXKey = cachedData.ApiResponse.Payload?.FirstOrDefault()?.IGXKey;
+                
+                var userId = _httpContextAccessor.HttpContext?.User
+                    .FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogInformation("User logged in - Applying pricing rules for user: {UserId}", userId);
+                    viewModel = await _pricingService.ApplyPricingToFlightsAsync(viewModel, userId);
+                }
+                
+                return viewModel;
+            }
+
             // Serialize request
             var requestBody = JsonSerializer.Serialize(request);
-            _logger.LogInformation("Request Body: {RequestBody}", requestBody);
+            _logger.LogDebug("Request Body: {RequestBody}", requestBody);
 
             // Create content
             var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
@@ -61,9 +81,6 @@ public class FlightSearchService : IFlightSearchService
                 return CreateErrorViewModel($"API returned {response.StatusCode} - {response.ReasonPhrase}");
             }
 
-            // Read response as string directly
-            //var jsonString = await response.Content.ReadAsStringAsync();
-
             // Read as byte array
             var bytes = await response.Content.ReadAsByteArrayAsync();
 
@@ -82,7 +99,7 @@ public class FlightSearchService : IFlightSearchService
             // Decompress if compressed
             if (isGzip)
             {
-                _logger.LogInformation("Response is GZIP compressed. Decompressing...");
+                _logger.LogDebug("Response is GZIP compressed. Decompressing...");
                 jsonString = DecompressGzip(bytes);
             }
             else
@@ -90,10 +107,6 @@ public class FlightSearchService : IFlightSearchService
                 // Not compressed, convert directly to string
                 jsonString = Encoding.UTF8.GetString(bytes);
             }
-
-            // Log preview for debugging
-            var preview = jsonString.Length > 200 ? jsonString.Substring(0, 200) + "..." : jsonString;
-            _logger.LogInformation("Response preview: {Preview}", preview);
 
             // Parse response
             var apiResponse = ParseJsonResponse(jsonString);
@@ -108,7 +121,7 @@ public class FlightSearchService : IFlightSearchService
             // Extract IGXKey
             string? igxKey = apiResponse.Payload?.FirstOrDefault()?.IGXKey;
 
-            // If IGX Key not null
+            // If IGX Key not null, cache the response
             if (!string.IsNullOrEmpty(igxKey))
             {
                 await _cacheService.StoreAsyc(igxKey, apiResponse, request);
@@ -129,7 +142,7 @@ public class FlightSearchService : IFlightSearchService
             }
             else
             {
-                _logger.LogInformation("User not logged in - No pricing rules applied");
+                _logger.LogDebug("User not logged in - No pricing rules applied");
             }
 
             // Map to ViewModel

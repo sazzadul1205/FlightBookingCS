@@ -15,5 +15,13 @@
         public bool IsFlexSearch { get; set; }
         public string? Flex { get; set; }
         public int[] ChildrenAges { get; set; } = [];
+
+        /// <summary>
+        /// Generates a cache key based on the search parameters.
+        /// </summary>
+        public string GenerateCacheKey()
+        {
+            return $"{Origin}_{Destination}_{DepartureDate}_{ReturnDate ?? "NA"}_{JourneyType}_{NoOfAdult}_{NoOfChildren}_{NoOfInfant}_{ClassType}";
+        }
     }
 }

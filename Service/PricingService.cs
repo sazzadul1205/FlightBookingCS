@@ -47,9 +47,21 @@ namespace FlightBookingCS.Service
                     return viewModel;
                 }
 
-                // Separate rules into "all airlines" and "specific airlines"
-                var allAirlinesRules = rules.Where(r => string.IsNullOrEmpty(r.AirlineCode)).ToList();
-                var specificAirlinesRules = rules.Where(r => !string.IsNullOrEmpty(r.AirlineCode)).ToList();
+                // Separate rules into "all airlines" and "specific airlines" - optimized with single pass
+                var allAirlinesRules = new List<MarkupCommissionRule>();
+                var specificAirlinesRules = new Dictionary<string, MarkupCommissionRule>();
+
+                foreach (var rule in rules)
+                {
+                    if (string.IsNullOrEmpty(rule.AirlineCode))
+                    {
+                        allAirlinesRules.Add(rule);
+                    }
+                    else if (!specificAirlinesRules.ContainsKey(rule.AirlineCode))
+                    {
+                        specificAirlinesRules[rule.AirlineCode] = rule;
+                    }
+                }
 
                 // Process each flight
                 foreach (var flight in viewModel.Flights)
@@ -58,38 +70,28 @@ namespace FlightBookingCS.Service
                     var airlineCode = flight.Onwards.FirstOrDefault()?.Carrier;
 
                     // Find matching rules for this airline
-                    var matchingRules = new List<MarkupCommissionRule>();
+                    MarkupCommissionRule? matchingRule = null;
 
                     // First, try to find specific airline rules
-                    if (!string.IsNullOrEmpty(airlineCode))
+                    if (!string.IsNullOrEmpty(airlineCode) && specificAirlinesRules.TryGetValue(airlineCode, out var specificRule))
                     {
-                        var specificRule = specificAirlinesRules
-                            .FirstOrDefault(r => r.AirlineCode == airlineCode);
-
-                        if (specificRule != null)
-                        {
-                            matchingRules.Add(specificRule);
-                        }
+                        matchingRule = specificRule;
                     }
-
                     // If no specific rule found, use "all airlines" rules
-                    if (!matchingRules.Any() && allAirlinesRules.Any())
+                    else if (allAirlinesRules.Any())
                     {
-                        matchingRules.Add(allAirlinesRules.First());
+                        matchingRule = allAirlinesRules.First();
                     }
 
                     // If no matching rules found, skip this flight
-                    if (!matchingRules.Any())
+                    if (matchingRule == null)
                     {
                         _logger.LogDebug("No pricing rules found for airline: {AirlineCode}", airlineCode);
                         continue;
                     }
 
-                    // Apply pricing rules
-                    foreach (var rule in matchingRules)
-                    {
-                        ApplyPricingRule(flight, rule);
-                    }
+                    // Apply pricing rule
+                    ApplyPricingRule(flight, matchingRule);
                 }
 
                 _logger.LogInformation("Pricing applied to {Count} flights for user: {UserId}", viewModel.Flights.Count, userId);
