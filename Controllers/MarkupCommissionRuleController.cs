@@ -87,7 +87,7 @@ public class MarkupCommissionRuleController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+
     public async Task<IActionResult> Create(MarkupCommissionRuleCreateViewModel model)
     {
         _logger.LogInformation("Frontend Hit Create");
@@ -168,7 +168,7 @@ public class MarkupCommissionRuleController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+
     public async Task<IActionResult> Edit(MarkupCommissionRuleEditViewModel model)
     {
         if (ModelState.IsValid)
@@ -250,7 +250,7 @@ public class MarkupCommissionRuleController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+
     public async Task<IActionResult> ChangeStatus(int Id)
     {
         try
@@ -275,7 +275,7 @@ public class MarkupCommissionRuleController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+
     public async Task<IActionResult> Restore(int Id)
     {
         try
@@ -300,7 +300,7 @@ public class MarkupCommissionRuleController : Controller
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
+
     public async Task<IActionResult> ForceDelete(int Id)
     {
         try
