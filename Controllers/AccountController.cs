@@ -10,15 +10,18 @@ public class AccountController : Controller
     private readonly IAccountService _accountService;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly IValidationService _validationService;
 
     public AccountController(
          IAccountService accountService,
          UserManager<IdentityUser> userManager,
-         SignInManager<IdentityUser> signInManager)
+         SignInManager<IdentityUser> signInManager,
+         IValidationService validationService)
     {
         _accountService = accountService;
         _userManager = userManager;
         _signInManager = signInManager;
+        _validationService = validationService;
     }
 
     [HttpGet]
@@ -31,6 +34,8 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
+        await ApplyFluentValidationAsync(model);
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -67,6 +72,8 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
+        await ApplyFluentValidationAsync(model);
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -104,6 +111,19 @@ public class AccountController : Controller
     public IActionResult AccessDenied()
     {
         return View();
+    }
+
+    private async Task ApplyFluentValidationAsync<T>(T model)
+    {
+        var errors = await _validationService.GetErrorsByPropertyAsync(model);
+
+        foreach (var property in errors)
+        {
+            foreach (var message in property.Value)
+            {
+                ModelState.AddModelError(property.Key, message);
+            }
+        }
     }
 
 }

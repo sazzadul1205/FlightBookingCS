@@ -13,6 +13,7 @@ namespace FlightBookingCS.Controllers
         private readonly IFlightSearchService _flightSearchService;
         private readonly IFilterService _filterService;
         private readonly IPricingService _pricingService;
+        private readonly IValidationService _validationService;
         private readonly ILogger<FlightSearchController> _logger;
 
         public FlightSearchController(
@@ -20,12 +21,14 @@ namespace FlightBookingCS.Controllers
             IFlightSearchService flightSearchService,
             IFilterService filterService,
             IPricingService pricingService,
-            IGetCitiesService citiesService)
+            IGetCitiesService citiesService,
+            IValidationService validationService)
         {
             _citiesService = citiesService;
             _flightSearchService = flightSearchService;
             _filterService = filterService;
             _pricingService = pricingService;
+            _validationService = validationService;
             _logger = logger;
         }
 
@@ -73,47 +76,10 @@ namespace FlightBookingCS.Controllers
                     return BadRequest(new { error = "Invalid Request" });
                 }
 
-                if (string.IsNullOrWhiteSpace(request.Origin))
+                var validationError = await GetFirstValidationErrorAsync(request);
+                if (validationError != null)
                 {
-                    return BadRequest(new { error = "Origin is Required" });
-                }
-
-                if (string.IsNullOrWhiteSpace(request.Destination))
-                {
-                    return BadRequest(new { error = "Destination is Required" });
-                }
-
-
-                if (string.IsNullOrWhiteSpace(request.Destination))
-                {
-                    return BadRequest(new { error = "Destination is Required" });
-                }
-
-                if (request.NoOfAdult <= 0)
-                {
-                    return BadRequest(new { error = "At least one adult passenger is required" });
-                }
-
-                if (string.IsNullOrWhiteSpace(request.DepartureDate))
-                {
-                    return BadRequest(new { error = "Departure date is required" });
-                }
-
-                // Validate date format
-                if (!DateTime.TryParse(request.DepartureDate, out _))
-                {
-                    return BadRequest(new { error = "Invalid departure date format. Use YYYY-MM-DD" });
-                }
-
-                // For round trip, validate return date
-                if (request.JourneyType == 2 && string.IsNullOrWhiteSpace(request.ReturnDate))
-                {
-                    return BadRequest(new { error = "Return date is required for round trip" });
-                }
-
-                if (request.JourneyType == 2 && !DateTime.TryParse(request.ReturnDate, out _))
-                {
-                    return BadRequest(new { error = "Invalid return date format. Use YYYY-MM-DD" });
+                    return BadRequest(new { error = validationError });
                 }
 
                 _logger.LogInformation("Searching flights: Origin={Origin}, Destination={Destination}, Departure={DepartureDate}, Adults={NoOfAdult}",
@@ -171,13 +137,19 @@ namespace FlightBookingCS.Controllers
         }
 
         [HttpPost("FlightSearch/options")]
-        public IActionResult ApplyFilter([FromBody] FilterRequest? filterRequest)
+        public async Task<IActionResult> ApplyFilter([FromBody] FilterRequest? filterRequest)
         {
             try
             {
-                if (filterRequest == null || string.IsNullOrEmpty(filterRequest.IGXKey))
+                if (filterRequest == null)
                 {
-                    return BadRequest(new { error = "IGXKey is required" });
+                    return BadRequest(new { error = "Invalid Request" });
+                }
+
+                var validationError = await GetFirstValidationErrorAsync(filterRequest);
+                if (validationError != null)
+                {
+                    return BadRequest(new { error = validationError });
                 }
 
                 var cachedResponse = _filterService.GetCachedResponse(filterRequest.IGXKey);
@@ -340,6 +312,12 @@ namespace FlightBookingCS.Controllers
             }
 
             return result;
+        }
+
+        private async Task<string?> GetFirstValidationErrorAsync<T>(T model)
+        {
+            var errors = await _validationService.GetErrorsAsync(model);
+            return errors.Count > 0 ? errors[0] : null;
         }
 
         private FareDetailItem? MapFareDetailItem(ApiFareDetailItem? source)

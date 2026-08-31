@@ -12,15 +12,18 @@ public class MarkupCommissionRuleController : Controller
 {
     private readonly IMarkupCommissionRuleService _markupCommissionService;
     private readonly IAirlineService _airlineService;
+    private readonly IValidationService _validationService;
     private readonly ILogger<MarkupCommissionRuleController> _logger;
 
     public MarkupCommissionRuleController(
         IMarkupCommissionRuleService markupCommissionService,
         IAirlineService airlineService,
+        IValidationService validationService,
         ILogger<MarkupCommissionRuleController> logger)
     {
         _markupCommissionService = markupCommissionService;
         _airlineService = airlineService;
+        _validationService = validationService;
         _logger = logger;
     }
 
@@ -98,6 +101,8 @@ public class MarkupCommissionRuleController : Controller
             return BadRequest("Model has returned Null");
         }
 
+        await ApplyFluentValidationAsync(model);
+
         if (ModelState.IsValid)
         {
             try
@@ -171,6 +176,8 @@ public class MarkupCommissionRuleController : Controller
 
     public async Task<IActionResult> Edit(MarkupCommissionRuleEditViewModel model)
     {
+        await ApplyFluentValidationAsync(model);
+
         if (ModelState.IsValid)
         {
             try
@@ -338,6 +345,19 @@ public class MarkupCommissionRuleController : Controller
             ViewBag.Airlines = new List<AirlinePayload>();
             ViewBag.ApiSuccess = false;
             ViewBag.ApiMessage = $"Error loading airlines: {ex.Message}";
+        }
+    }
+
+    private async Task ApplyFluentValidationAsync<T>(T model)
+    {
+        var errors = await _validationService.GetErrorsByPropertyAsync(model);
+
+        foreach (var property in errors)
+        {
+            foreach (var message in property.Value)
+            {
+                ModelState.AddModelError(property.Key, message);
+            }
         }
     }
 }

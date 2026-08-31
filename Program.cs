@@ -7,6 +7,7 @@ using FlightBookingCS.Service.Interface;
 using Microsoft.AspNetCore.HttpOverrides;
 
 // External
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -35,6 +36,8 @@ var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
 builder.Services.Configure<FlightApiOptions>(
     builder.Configuration.GetSection("FlightApi"));
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Configure Authentication
 builder.Services.AddAuthentication(options =>
@@ -93,6 +96,7 @@ builder.Services.AddScoped<IFlightSearchService, FlightSearchService>();
 builder.Services.AddScoped<IFilterService, FilterService>();
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
+builder.Services.AddScoped<IValidationService, ValidationService>();
 
 builder.Services.AddScoped(sp =>
     sp.GetRequiredService<IOptions<FlightApiOptions>>().Value);
