@@ -1,4 +1,5 @@
 ﻿
+using FlightBookingCS.Options;
 using FlightBookingCS.Service.Interface;
 using FlightBookingCS.ViewModel;
 using System.Text.Json;
@@ -9,13 +10,16 @@ namespace FlightBookingCS.Service
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<GetCitiesService> _logger;
+        private readonly FlightApiOptions _options;
 
         public GetCitiesService(
             HttpClient httpClient,
+            FlightApiOptions options,
             ILogger<GetCitiesService> logger)
         {
             _httpClient = httpClient;
             _logger = logger;
+            _options = options;
         }
 
         public async Task<CitiesViewModal> GetCitiesAsync(string search)
@@ -28,7 +32,7 @@ namespace FlightBookingCS.Service
                     return CreateErrorResponse("Search Has Not been Provided");
                 }
 
-                var apiUrl = $"https://uthaotrip.com/api/Auto/GetCities/?input={Uri.EscapeDataString(search)}";
+                var apiUrl = $"{_options.BaseUrl}{_options.CitiesEndpoint}?input={Uri.EscapeDataString(search)}";
 
                 // 
                 _httpClient.DefaultRequestHeaders.Clear();

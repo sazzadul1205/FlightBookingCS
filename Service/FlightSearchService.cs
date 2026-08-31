@@ -1,4 +1,5 @@
-﻿using FlightBookingCS.Service.Interface;
+﻿using FlightBookingCS.Options;
+using FlightBookingCS.Service.Interface;
 using FlightBookingCS.ViewModel;
 using FlightBookingCS.ViewModel.ApiModels;
 using System.IO.Compression;
@@ -14,6 +15,7 @@ public class FlightSearchService : IFlightSearchService
     private readonly ICacheService _cacheService;
     private readonly IPricingService _pricingService;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly FlightApiOptions _options;
 
 
     public FlightSearchService(
@@ -21,6 +23,7 @@ public class FlightSearchService : IFlightSearchService
         ICacheService cacheService,
         IPricingService pricingService,
         IHttpContextAccessor httpContextAccessor,
+        FlightApiOptions options,
         ILogger<FlightSearchService> logger)
     {
         _httpClient = httpClient;
@@ -28,13 +31,14 @@ public class FlightSearchService : IFlightSearchService
         _pricingService = pricingService;
         _httpContextAccessor = httpContextAccessor;
         _logger = logger;
+        _options = options;
     }
 
     public async Task<FlightResultsViewModel> SearchFlightsAsync(FlightSearchRequest request)
     {
         try
         {
-            var apiUrl = "https://uthaotrip.com/api/air/UnauthorizeSearchAir";
+            var apiUrl = $"{_options.BaseUrl}{_options.SearchEndpoint}";
             _logger.LogInformation("Searching flights from: {ApiUrl}", apiUrl);
 
             // Try to get from cache first if available

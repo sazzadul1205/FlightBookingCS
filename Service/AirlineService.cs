@@ -1,3 +1,4 @@
+using FlightBookingCS.Options;
 using FlightBookingCS.Service.Interface;
 using FlightBookingCS.ViewModel;
 using System.IO.Compression;
@@ -10,18 +11,23 @@ public class AirlineService : IAirlineService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<AirlineService> _logger;
+    private readonly FlightApiOptions _options;
 
-    public AirlineService(HttpClient httpClient, ILogger<AirlineService> logger)
+    public AirlineService(
+        HttpClient httpClient,
+        FlightApiOptions options,
+        ILogger<AirlineService> logger)
     {
         _httpClient = httpClient;
         _logger = logger;
+        _options = options;
     }
 
     public async Task<AirlineApiResponse> GetAirlineAsync()
     {
         try
         {
-            var apiUrl = "https://uthaotrip.com/api/api/GetAirLines";
+            var apiUrl = $"{_options.BaseUrl}{_options.AirlinesEndpoint}";
             _logger.LogInformation("Fetching airlines from: {ApiUrl}", apiUrl);
 
             // 
