@@ -1,4 +1,4 @@
-﻿namespace FlightBookingCS.ViewModel
+﻿namespace FlightBookingCS.ViewModel.Airline.Requests
 {
     public class FilterRequest
     {

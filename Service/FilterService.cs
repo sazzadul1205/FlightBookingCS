@@ -1,7 +1,7 @@
 ﻿// Service/FilterService.cs
 using FlightBookingCS.Service.Interface;
-using FlightBookingCS.ViewModel;
-using FlightBookingCS.ViewModel.ApiModels;
+using FlightBookingCS.ViewModel.Airline.Requests;
+using FlightBookingCS.ViewModel.Flight.Responses;
 
 namespace FlightBookingCS.Service;
 

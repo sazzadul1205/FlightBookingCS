@@ -1,4 +1,4 @@
-﻿using FlightBookingCS.ViewModel;
+﻿using FlightBookingCS.ViewModel.Flight.Responses;
 
 namespace FlightBookingCS.Service.Interface
 {

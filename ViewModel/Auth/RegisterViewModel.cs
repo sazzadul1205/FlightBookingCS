@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FlightBookingCS.ViewModel;
+namespace FlightBookingCS.ViewModel.Auth;
 
 public class RegisterViewModel
 {

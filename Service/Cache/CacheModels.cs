@@ -1,6 +1,6 @@
 ﻿// CacheModels.cs
-using FlightBookingCS.ViewModel;
-using FlightBookingCS.ViewModel.ApiModels;
+using FlightBookingCS.ViewModel.Flight.Requests;
+using FlightBookingCS.ViewModel.Flight.Responses;
 
 namespace FlightBookingCS.Service.Cache
 {

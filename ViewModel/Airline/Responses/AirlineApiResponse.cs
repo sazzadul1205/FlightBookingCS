@@ -1,4 +1,4 @@
-namespace FlightBookingCS.ViewModel;
+namespace FlightBookingCS.ViewModel.Airline.Responses;
 
 public class AirlineApiResponse
 {

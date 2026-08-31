@@ -1,6 +1,6 @@
 using FlightBookingCS.Options;
 using FlightBookingCS.Service.Interface;
-using FlightBookingCS.ViewModel;
+using FlightBookingCS.ViewModel.Airline.Responses;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;

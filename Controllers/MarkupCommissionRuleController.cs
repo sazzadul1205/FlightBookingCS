@@ -1,5 +1,5 @@
 using FlightBookingCS.Service.Interface;
-using FlightBookingCS.ViewModel;
+using FlightBookingCS.ViewModel.Airline.Responses;
 using FlightBookingCS.ViewModel.MarkupCommissionRule;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

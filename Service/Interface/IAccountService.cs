@@ -1,4 +1,4 @@
-using FlightBookingCS.ViewModel;
+using FlightBookingCS.ViewModel.Auth;
 
 namespace FlightBookingCS.Service.Interface;
 

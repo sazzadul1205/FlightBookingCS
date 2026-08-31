@@ -1,7 +1,6 @@
-﻿
-using FlightBookingCS.Options;
+﻿using FlightBookingCS.Options;
 using FlightBookingCS.Service.Interface;
-using FlightBookingCS.ViewModel;
+using FlightBookingCS.ViewModel.Airline.Responses;
 using System.Text.Json;
 
 namespace FlightBookingCS.Service

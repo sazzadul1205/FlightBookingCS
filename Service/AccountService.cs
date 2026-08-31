@@ -1,5 +1,5 @@
 using FlightBookingCS.Service.Interface;
-using FlightBookingCS.ViewModel;
+using FlightBookingCS.ViewModel.Auth;
 using Microsoft.AspNetCore.Identity;
 
 namespace FlightBookingCS.Service;

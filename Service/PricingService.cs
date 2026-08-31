@@ -1,7 +1,7 @@
 ﻿using FlightBookingCS.Data;
 using FlightBookingCS.Models;
 using FlightBookingCS.Service.Interface;
-using FlightBookingCS.ViewModel;
+using FlightBookingCS.ViewModel.Flight.Responses;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlightBookingCS.Service

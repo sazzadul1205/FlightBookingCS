@@ -1,8 +1,7 @@
 ﻿using FlightBookingCS.Service.Cache;
 using FlightBookingCS.Service.Interface;
-using FlightBookingCS.ViewModel;
-using FlightBookingCS.ViewModel.ApiModels;
-using System.Collections;
+using FlightBookingCS.ViewModel.Flight.Requests;
+using FlightBookingCS.ViewModel.Flight.Responses;
 using System.Text.Json;
 
 namespace FlightBookingCS.Service

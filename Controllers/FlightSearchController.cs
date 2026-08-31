@@ -1,7 +1,7 @@
-﻿using FlightBookingCS.Service;
-using FlightBookingCS.Service.Interface;
-using FlightBookingCS.ViewModel;
-using FlightBookingCS.ViewModel.ApiModels;
+﻿using FlightBookingCS.Service.Interface;
+using FlightBookingCS.ViewModel.Airline.Requests;
+using FlightBookingCS.ViewModel.Flight.Requests;
+using FlightBookingCS.ViewModel.Flight.Responses;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 

@@ -97,8 +97,6 @@ builder.Services.AddScoped<IPricingService, PricingService>();
 builder.Services.AddScoped(sp =>
     sp.GetRequiredService<IOptions<FlightApiOptions>>().Value);
 
-// Add this if you're behind IIS/Nginx/a load balancer that terminates HTTPS
-
 
 // Register antiforgery with explicit cookie settings
 builder.Services.AddAntiforgery(options =>

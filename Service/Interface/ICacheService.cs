@@ -1,6 +1,6 @@
 ﻿using FlightBookingCS.Service.Cache;
-using FlightBookingCS.ViewModel;
-using FlightBookingCS.ViewModel.ApiModels;
+using FlightBookingCS.ViewModel.Flight.Requests;
+using FlightBookingCS.ViewModel.Flight.Responses;
 
 namespace FlightBookingCS.Service.Interface
 {

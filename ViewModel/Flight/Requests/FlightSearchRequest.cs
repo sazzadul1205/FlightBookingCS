@@ -1,4 +1,4 @@
-﻿namespace FlightBookingCS.ViewModel
+﻿namespace FlightBookingCS.ViewModel.Flight.Requests
 {
     public class FlightSearchRequest
     {

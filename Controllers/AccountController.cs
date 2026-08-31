@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using FlightBookingCS.ViewModel;
 using FlightBookingCS.Service.Interface;
+using FlightBookingCS.ViewModel.Auth;
 
 namespace FlightBookingCS.Controllers;
 

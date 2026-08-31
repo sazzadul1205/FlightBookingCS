@@ -2,8 +2,8 @@
 
 @{
     ViewData["Title"] = "Create New Rule";
-    var airlines = ViewBag.Airlines as List<FlightBookingCS.ViewModel.AirlinePayload> ?? new
-List<FlightBookingCS.ViewModel.AirlinePayload>();
+    var airlines = ViewBag.Airlines as List<FlightBookingCS.ViewModel.Airline.Responses.AirlinePayload> ?? new
+List<FlightBookingCS.ViewModel.Airline.Responses.AirlinePayload>();
     var apiSuccess = ViewBag.ApiSuccess as bool? ?? false;
     var apiMessage = ViewBag.ApiMessage as string ?? "";
 }
